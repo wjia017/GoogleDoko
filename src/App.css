@@ -4069,6 +4069,10 @@ x
     gap: 15px;
   }
 
+  .order-image {
+    width: 85px;
+    height: 75px;
+  }
 
   .order-delivery {
     padding-left: 0;

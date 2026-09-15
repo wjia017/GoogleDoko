@@ -6,40 +6,73 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+
 function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
 
         {/* Logo */}
-        <div className="logo">
+        <Link to="/" className="logo">
           <div className="logo-icon">🌿</div>
           <span>GoogleDoko</span>
-        </div>
+        </Link>
 
-        {/* Navigation */}
+
+        {/* Navigation Links */}
         <div className="nav-links">
-          <a href="#" className="active">
-            Home
-          </a>
 
-          <a href="#" className="category-link">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
+            Home
+          </NavLink>
+
+          <NavLink
+            to="/categories"
+            className="category-link"
+          >
             Categories
             <ChevronDown size={16} />
-          </a>
+          </NavLink>
 
-          <a href="#">Orders</a>
+          <NavLink
+            to="/orders"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
+            Orders
+          </NavLink>
 
-          <a href="#" className="cart-link">
+          <NavLink
+            to="/cart"
+            className="cart-link"
+          >
             Cart
             <ShoppingCart size={19} />
-          </a>
+          </NavLink>
 
-          <a href="#">About Us</a>
+          <NavLink
+            to="/about"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
+            About Us
+          </NavLink>
+
         </div>
+
 
         {/* Search */}
         <div className="search-container">
+
           <input
             type="text"
             placeholder="Search products or places"
@@ -48,17 +81,25 @@ function Navbar() {
           <button type="button">
             <Search size={22} />
           </button>
+
         </div>
 
-        {/* User actions */}
+
+        {/* Actions */}
         <div className="nav-actions">
 
-          <button type="button" className="nav-action">
+          <button
+            type="button"
+            className="nav-action"
+          >
             <Heart size={23} />
             <span>Wishlist</span>
           </button>
 
-          <button type="button" className="nav-action">
+          <button
+            type="button"
+            className="nav-action"
+          >
             <UserRound size={23} />
             <span>Account</span>
           </button>

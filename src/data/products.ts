@@ -35,7 +35,7 @@ export const products: Product[] = [
     sold: "320+",
     origin: "Kullu, HP",
     seller: "Himalaya Farm",
-    image: "/images/products/apple.png",
+    image: "/src/assets/images/products/apple.jpg",
   },
 
   {
@@ -48,7 +48,7 @@ export const products: Product[] = [
     sold: "250+",
     origin: "Mustang, Nepal",
     seller: "Pure Natural",
-    image: "/images/products/honey.png",
+    image: "/src/assets/images/products/honey.jpg",
   },
 
   {
@@ -61,7 +61,7 @@ export const products: Product[] = [
     sold: "280+",
     origin: "Sunsari, Nepal",
     seller: "Fresh Valley",
-    image: "/images/products/orange.png",
+    image: "/src/assets/images/products/orange.jpg",
   },
 
   {
@@ -74,6 +74,6 @@ export const products: Product[] = [
     sold: "200+",
     origin: "Damak, Nepal",
     seller: "Green Harvest",
-    image: "/images/products/avocado.png",
+    image: "/src/assets/images/products/avocado.jpg",
   },
 ];

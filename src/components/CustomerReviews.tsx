@@ -3,19 +3,19 @@ const reviews = [
     id: 1,
     text: "The vegetables are so fresh and organic. I can really taste the difference. Highly recommended!",
     name: "Sneha M.",
-    image: "/images/customers/sneha.png",
+    image: "/src/assets/images/customers/sneha.webp",
   },
   {
     id: 2,
     text: "Great quality products and super fast delivery. I love how they support local farmers.",
     name: "Arjun K.",
-    image: "/images/customers/arjun.png",
+    image: "/src/assets/images/customers/arjun.jpeg",
   },
   {
     id: 3,
     text: "This is my go-to store for all fresh produce. Everything is always top notch!",
     name: "Pooja R.",
-    image: "/images/customers/pooja.png",
+    image: "/src/assets/images/customers/pooja.avif",
   },
 ];
 

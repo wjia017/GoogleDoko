@@ -1,29 +1,35 @@
 import OfferCard from "./OfferCard";
 
+import explorePlacesImage from "../assets/images/offers/explore-places.jpg";
+import popularNearYouImage from "../assets/images/offers/popular-near-you.jpg";
+import seasonalImage from "../assets/images/offers/seasonal.jpg";
+
 const offers = [
   {
     id: 1,
     title: "Explore by Places",
     description: "Fresh picks from local farmers near you",
     buttonText: "Explore Now",
-    image: "/src/assets/images/offers/explore-places.jpg",
+    image: explorePlacesImage,
     theme: "green" as const,
   },
+
   {
     id: 2,
     title: "Popular Near You",
     description: "Top loved picks in your area",
     buttonText: "Explore Now",
-    image: "/src/assets/images/offers/popular-near-you.jpg",
+    image: popularNearYouImage,
     theme: "yellow" as const,
     badge: "Trending Now",
   },
+
   {
     id: 3,
     title: "Seasonal Products",
     description: "Handpicked freshness for every season",
     buttonText: "Discover Now",
-    image: "/src/assets/images/offers/seasonal.jpg",
+    image: seasonalImage,
     theme: "blue" as const,
     badge: "Best",
   },
@@ -32,15 +38,20 @@ const offers = [
 function SpecialOffers() {
   return (
     <section className="offers-section">
+
       <div className="section-header">
+
         <h2>Special Offers</h2>
 
         <button type="button">
           View all
         </button>
+
       </div>
 
+
       <div className="offers-grid">
+
         {offers.map((offer) => (
           <OfferCard
             key={offer.id}
@@ -52,7 +63,9 @@ function SpecialOffers() {
             badge={offer.badge}
           />
         ))}
+
       </div>
+
     </section>
   );
 }

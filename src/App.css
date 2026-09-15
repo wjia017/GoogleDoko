@@ -664,87 +664,106 @@ x
 
 .offers-section {
   max-width: 1340px;
-
   margin: 0 auto;
-
   padding: 25px 20px 70px;
 }
 
+/* Section heading */
 
 .section-header {
   display: flex;
-
   align-items: center;
   justify-content: space-between;
-
   margin-bottom: 30px;
 }
 
 .section-header h2 {
   color: #1d5b2b;
-
   font-size: 28px;
   font-weight: 700;
 }
 
 .section-header button {
   border: none;
-
   background: transparent;
-
   color: #1d5b2b;
-
   font-size: 17px;
   font-weight: 600;
-
   cursor: pointer;
 }
 
 
-/* Offer grid */
+/* ================================
+   OFFER GRID
+================================ */
 
 .offers-grid {
   display: grid;
-
   grid-template-columns: repeat(3, 1fr);
-
   gap: 25px;
 }
 
 
-/* Offer card */
+/* ================================
+   OFFER CARD
+================================ */
 
 .offer-card {
   position: relative;
-
   height: 365px;
-
   overflow: hidden;
-
   border-radius: 18px;
 }
+
+
+/* ================================
+   BACKGROUND IMAGE
+================================ */
 
 .offer-background {
   position: absolute;
 
-  inset: 0;
+  top: 0;
+  left: 0;
 
   width: 100%;
   height: 100%;
 
-  object-fit: cover;
+
+  /*object-fit: cover;*/
+
+  object-position: center center;
+
+  display: block;
+
+  z-index: 0;
 }
+
+
+/* ================================
+   IMAGE OVERLAY
+================================ */
 
 .offer-overlay {
   position: absolute;
 
-  inset: 0;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
 
   background: rgba(255, 255, 255, 0.08);
+
+  z-index: 1;
+
+  pointer-events: none;
 }
 
 
-/* Content */
+/* ================================
+   CONTENT
+================================ */
 
 .offer-content {
   position: relative;
@@ -771,7 +790,9 @@ x
 }
 
 
-/* Themes */
+/* ================================
+   CARD THEMES
+================================ */
 
 .offer-card.green {
   color: #1e5d2d;
@@ -786,12 +807,33 @@ x
 }
 
 
-/* Button */
+/* ================================
+   IMAGE POSITION
+================================ */
+
+
+
+.offer-card.green .offer-background {
+  object-position: center center;
+}
+
+.offer-card.yellow .offer-background {
+  object-position: center center;
+}
+
+.offer-card.blue .offer-background {
+  object-position: center center;
+}
+
+
+/* ================================
+   BUTTON
+================================ */
 
 .offer-button {
   display: flex;
-
   align-items: center;
+  justify-content: center;
   gap: 8px;
 
   border: none;
@@ -821,12 +863,15 @@ x
 }
 
 
-/* Badge */
+/* ================================
+   BADGE
+================================ */
 
 .offer-badge {
   display: flex;
-
   align-items: center;
+  justify-content: center;
+
   gap: 6px;
 
   width: fit-content;
@@ -846,6 +891,11 @@ x
   font-weight: 600;
 }
 
+
+/* ================================
+   TABLET
+================================ */
+
 @media (max-width: 950px) {
   .offers-grid {
     grid-template-columns: 1fr;
@@ -859,6 +909,11 @@ x
     width: 55%;
   }
 }
+
+
+/* ================================
+   MOBILE
+================================ */
 
 @media (max-width: 550px) {
   .offers-section {
@@ -4081,4 +4136,905 @@ x
   .order-card {
     padding: 14px;
   }
+}
+
+/* =========================================================
+   CART PAGE
+========================================================= */
+
+.cart-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #f1f8f5;
+  padding: 20px 0 50px;
+  overflow-x: hidden;
+}
+
+.cart-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+
+/* =========================================================
+   HEADING
+========================================================= */
+
+.cart-heading {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.cart-heading h1 {
+  margin: 0 0 5px;
+  color: #185b58;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.cart-heading p {
+  margin: 0;
+  color: #222;
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   MAIN TWO-COLUMN LAYOUT
+========================================================= */
+
+.cart-layout {
+  width: 100%;
+  display: grid;
+
+  /*
+     minmax(0, 1fr) is important.
+     It prevents children from forcing the grid
+     wider than the screen.
+  */
+  grid-template-columns:
+    minmax(0, 1.05fr)
+    minmax(0, 1fr);
+
+  gap: 15px;
+
+  align-items: start;
+}
+
+
+/* =========================================================
+   LEFT SIDE
+========================================================= */
+
+.cart-items {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+
+/* =========================================================
+   CART ITEM
+========================================================= */
+
+.cart-item {
+  width: 100%;
+  min-width: 0;
+  min-height: 120px;
+
+  background: #ffffff;
+  border-radius: 10px;
+
+  display: grid;
+
+  grid-template-columns:
+    120px
+    minmax(0, 1fr)
+    108px
+    80px
+    30px;
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 13px 18px;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   PRODUCT IMAGE
+========================================================= */
+
+.cart-item-image {
+  width: 120px;
+  height: 96px;
+
+  overflow: hidden;
+  border-radius: 9px;
+
+  flex-shrink: 0;
+}
+
+.cart-item-image img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   PRODUCT INFO
+========================================================= */
+
+.cart-item-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cart-item-info h3 {
+  margin: 0 0 2px;
+
+  color: #111;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.cart-item-info strong {
+  margin: 0 0 22px;
+
+  color: #111;
+  font-size: 15px;
+}
+
+.cart-item-price {
+  color: #ff8c00;
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   QUANTITY
+========================================================= */
+
+.quantity-control {
+  width: 108px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border: 1px solid #999;
+  border-radius: 8px;
+
+  overflow: hidden;
+
+  flex-shrink: 0;
+}
+
+.quantity-control button {
+  width: 35px;
+  height: 100%;
+
+  border: none;
+  background: #ffffff;
+
+  color: #555;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.quantity-control button:last-child {
+  color: #1da53c;
+}
+
+.quantity-control span {
+  min-width: 20px;
+
+  text-align: center;
+
+  color: #222;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   ITEM TOTAL
+========================================================= */
+
+.cart-item-total {
+  color: #ff8c00;
+
+  font-size: 15px;
+  text-align: right;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   REMOVE BUTTON
+========================================================= */
+
+.remove-cart-item {
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  background: transparent;
+
+  color: #202020;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.remove-cart-item:hover {
+  color: #e53935;
+}
+
+
+/* =========================================================
+   RIGHT SIDEBAR
+========================================================= */
+
+.cart-sidebar {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+
+/* =========================================================
+   PRICE DETAILS
+========================================================= */
+
+.price-details {
+  width: 100%;
+  min-width: 0;
+
+  background: #ffffff;
+
+  border-radius: 20px;
+
+  padding: 30px 25px 25px;
+
+  /*
+     IMPORTANT:
+     Do not use position absolute here.
+  */
+  position: relative;
+
+  overflow: hidden;
+}
+
+.price-details h2 {
+  margin: 0 0 24px;
+
+  color: #4b851e;
+
+  font-size: 24px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   PRICE ROWS
+========================================================= */
+
+.price-row {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 16px;
+}
+
+.price-row span {
+  color: #58996c;
+  font-size: 17px;
+}
+
+.price-row strong {
+  color: #249d93;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   DIVIDER
+========================================================= */
+
+.price-divider {
+  width: 100%;
+  height: 1px;
+
+  background: #eeeeee;
+
+  margin: 22px 0;
+}
+
+
+/* =========================================================
+   TOTAL
+========================================================= */
+
+.total-row {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 32px;
+}
+
+.total-row span {
+  color: #5b9d6b;
+
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.total-row strong {
+  color: #168b45;
+
+  font-size: 28px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   PAYMENT HEADING
+========================================================= */
+
+.payment-heading {
+  margin: 0 0 18px;
+
+  color: #5b9d6b;
+
+  font-size: 18px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   PAYMENT METHODS
+========================================================= */
+
+.payment-methods {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 12px;
+
+  /*
+     This is important.
+     The cards stay inside the price-details box.
+  */
+  margin: 0 0 24px;
+}
+
+
+/* =========================================================
+   PAYMENT CARD
+========================================================= */
+
+.payment-card {
+  width: 100%;
+  min-width: 0;
+  min-height: 118px;
+
+  padding: 12px 5px;
+
+  background: #ffffff;
+
+  border: 1px solid #75d6a3;
+
+  border-radius: 16px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  color: #397950;
+
+  cursor: pointer;
+
+  /*
+     Prevent text/content from pushing
+     the card outside the grid.
+  */
+  overflow: hidden;
+}
+
+.payment-card.selected {
+  background: #f0faf6;
+
+  border: 3px solid #43b86d;
+}
+
+
+/* =========================================================
+   PAYMENT CIRCLE
+========================================================= */
+
+.payment-circle {
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #dedede;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 4px;
+}
+
+.payment-circle span {
+  color: #777;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   PAYMENT TEXT
+========================================================= */
+
+.payment-card strong {
+  max-width: 100%;
+
+  color: #397950;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-align: center;
+
+  white-space: normal;
+}
+
+.payment-card small {
+  max-width: 100%;
+
+  color: #397950;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   PROCEED TO PAYMENT
+========================================================= */
+
+.proceed-payment-button {
+  /*
+     VERY IMPORTANT:
+     Keep this in normal document flow.
+     No absolute positioning.
+  */
+
+  position: relative;
+
+  width: 100%;
+  height: 48px;
+
+  margin: 0 0 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+
+  border-radius: 25px;
+
+  background: #ff9d19;
+
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  z-index: 1;
+}
+
+.proceed-payment-button:hover {
+  background: #f38d08;
+}
+
+
+/* =========================================================
+   PAYMENT SAFE
+========================================================= */
+
+.payment-safe {
+  margin: 0;
+
+  text-align: center;
+
+  color: #39a54a;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   PROMO SECTION
+========================================================= */
+
+.promo-section {
+  width: 100%;
+  min-width: 0;
+
+  background: #ffffff;
+
+  border-radius: 20px;
+
+  padding: 16px 12px 12px;
+
+  overflow: hidden;
+}
+
+.promo-section h3 {
+  margin: 0 0 14px;
+  padding-left: 2px;
+
+  color: #222;
+
+  font-size: 18px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   PROMO BOX
+========================================================= */
+
+.promo-box {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    48px
+    minmax(0, 1fr)
+    92px;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 10px;
+
+  background: #f0faf6;
+
+  border-radius: 16px;
+}
+
+
+/* =========================================================
+   PROMO ICON
+========================================================= */
+
+.promo-icon {
+  width: 42px;
+  height: 42px;
+
+  border: 1px dashed #45ad4d;
+
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #369a45;
+}
+
+
+/* =========================================================
+   PROMO INPUT
+========================================================= */
+
+.promo-box input {
+  width: 100%;
+  min-width: 0;
+
+  height: 38px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 10px;
+
+  padding: 0 15px;
+
+  outline: none;
+
+  font-size: 13px;
+}
+
+.promo-box input:focus {
+  border-color: #4cad61;
+}
+
+
+/* =========================================================
+   PROMO BUTTON
+========================================================= */
+
+.promo-box button {
+  width: 92px;
+  height: 38px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #3da044;
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   EMPTY CART
+========================================================= */
+
+.empty-cart {
+  width: 100%;
+  min-height: 250px;
+
+  background: #ffffff;
+
+  border-radius: 15px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.empty-cart h2 {
+  margin-bottom: 10px;
+
+  color: #185b58;
+}
+
+.empty-cart p {
+  color: #666;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .cart-container {
+    padding: 0 20px;
+  }
+
+  .cart-layout {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 0.9fr);
+  }
+
+  .cart-item {
+    grid-template-columns:
+      100px
+      minmax(0, 1fr)
+      95px
+      65px
+      25px;
+
+    gap: 12px;
+  }
+
+  .cart-item-image {
+    width: 100px;
+    height: 85px;
+  }
+
+  .payment-methods {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 800px) {
+
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-sidebar {
+    margin-top: 5px;
+  }
+
+  .cart-item {
+    grid-template-columns:
+      90px
+      minmax(0, 1fr)
+      30px;
+
+    gap: 12px;
+
+    padding: 12px;
+  }
+
+  .cart-item-image {
+    width: 90px;
+    height: 80px;
+  }
+
+  .quantity-control {
+    grid-column: 2;
+    grid-row: 2;
+
+    width: 108px;
+  }
+
+  .cart-item-total {
+    grid-column: 2;
+    grid-row: 3;
+
+    text-align: left;
+  }
+
+  .remove-cart-item {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 550px) {
+
+  .cart-page {
+    padding-top: 15px;
+  }
+
+  .cart-container {
+    padding: 0 12px;
+  }
+
+  .cart-heading h1 {
+    font-size: 24px;
+  }
+
+  .cart-heading p {
+    font-size: 14px;
+  }
+
+  .price-details {
+    padding: 22px 16px;
+  }
+
+  .price-details h2 {
+    font-size: 21px;
+  }
+
+  .total-row strong {
+    font-size: 24px;
+  }
+
+  .payment-methods {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 8px;
+  }
+
+  .payment-card {
+    min-height: 110px;
+  }
+
+  .promo-box {
+    grid-template-columns:
+      42px
+      minmax(0, 1fr);
+  }
+
+  .promo-box button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   EXTRA SAFETY AGAINST HORIZONTAL OVERFLOW
+========================================================= */
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+* {
+  max-width: 100%;
 }

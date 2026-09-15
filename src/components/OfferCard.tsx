@@ -19,31 +19,47 @@ function OfferCard({
 }: OfferCardProps) {
   return (
     <article className={`offer-card ${theme}`}>
+
+      {/* Background image */}
       <img
         src={image}
-        alt={title}
+        alt=""
         className="offer-background"
       />
 
-      <div className="offer-overlay"></div>
 
+      {/* Content */}
       <div className="offer-content">
+
         {badge && (
           <div className="offer-badge">
-            <Flame size={17} />
-            {badge}
+            <Flame size={18} />
+            <span>{badge}</span>
           </div>
         )}
 
-        <h3>{title}</h3>
 
-        <p>{description}</p>
+        <h3>
+          {title}
+        </h3>
 
-        <button type="button" className="offer-button">
-          {buttonText}
-          <ArrowRight size={18} />
+
+        <p>
+          {description}
+        </p>
+
+
+        <button
+          type="button"
+          className="offer-button"
+        >
+          <span>{buttonText}</span>
+
+          <ArrowRight size={20} />
         </button>
+
       </div>
+
     </article>
   );
 }

@@ -6,22 +6,27 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
 
-        {/* Logo */}
+        {/* ================================
+            LOGO
+        ================================= */}
+
         <Link to="/" className="logo">
           <div className="logo-icon">🌿</div>
           <span>GoogleDoko</span>
         </Link>
 
 
-        {/* Navigation Links */}
+        {/* ================================
+            NAVIGATION
+        ================================= */}
+
         <div className="nav-links">
 
           <NavLink
@@ -33,13 +38,17 @@ function Navbar() {
             Home
           </NavLink>
 
+
           <NavLink
             to="/categories"
-            className="category-link"
+            className={({ isActive }) =>
+              `category-link ${isActive ? "active" : ""}`
+            }
           >
             Categories
             <ChevronDown size={16} />
           </NavLink>
+
 
           <NavLink
             to="/orders"
@@ -50,13 +59,17 @@ function Navbar() {
             Orders
           </NavLink>
 
+
           <NavLink
             to="/cart"
-            className="cart-link"
+            className={({ isActive }) =>
+              `cart-link ${isActive ? "active" : ""}`
+            }
           >
             Cart
             <ShoppingCart size={19} />
           </NavLink>
+
 
           <NavLink
             to="/about"
@@ -70,7 +83,10 @@ function Navbar() {
         </div>
 
 
-        {/* Search */}
+        {/* ================================
+            SEARCH
+        ================================= */}
+
         <div className="search-container">
 
           <input
@@ -78,31 +94,35 @@ function Navbar() {
             placeholder="Search products or places"
           />
 
-          <button type="button">
+          <button type="button" aria-label="Search">
             <Search size={22} />
           </button>
 
         </div>
 
 
-        {/* Actions */}
+        {/* ================================
+            ACTIONS
+        ================================= */}
+
         <div className="nav-actions">
 
-          <button
-            type="button"
+          <Link
+            to="/wishlist"
             className="nav-action"
           >
             <Heart size={23} />
             <span>Wishlist</span>
-          </button>
+          </Link>
 
-          <button
-            type="button"
+
+          <Link
+            to="/account"
             className="nav-action"
           >
             <UserRound size={23} />
             <span>Account</span>
-          </button>
+          </Link>
 
         </div>
 

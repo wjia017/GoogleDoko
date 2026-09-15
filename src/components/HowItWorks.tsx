@@ -13,7 +13,7 @@ const steps = [
         produce
       </>
     ),
-    image: "/images/how-it-works/farmer.png",
+    image: "/src/assets/images/how-it-works/farmer.jpg",
   },
   {
     id: 2,
@@ -27,7 +27,7 @@ const steps = [
         and safety
       </>
     ),
-    image: "/images/how-it-works/verification.png",
+    image: "/src/assets/images/how-it-works/verification.jpg",
   },
   {
     id: 3,

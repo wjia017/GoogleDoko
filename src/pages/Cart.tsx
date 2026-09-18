@@ -9,92 +9,15 @@ import {
 import TopBar from "../components/TopBar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
-interface CartItem {
-    id: number;
-    name: string;
-    weight: string;
-    price: number;
-    quantity: number;
-    image: string;
-}
-
-const initialCartItems: CartItem[] = [
-    {
-        id: 1,
-        name: "Apple",
-        weight: "1 kg",
-        price: 150,
-        quantity: 1,
-        image: "/images/products/apple.png",
-    },
-    {
-        id: 2,
-        name: "Apple",
-        weight: "1 kg",
-        price: 150,
-        quantity: 1,
-        image: "/images/products/apple.png",
-    },
-    {
-        id: 3,
-        name: "Apple",
-        weight: "1 kg",
-        price: 150,
-        quantity: 1,
-        image: "/images/products/apple.png",
-    },
-    {
-        id: 4,
-        name: "Apple",
-        weight: "1 kg",
-        price: 150,
-        quantity: 1,
-        image: "/images/products/apple.png",
-    },
-];
+import { useCart } from "../context/CartContext";
 
 function Cart() {
-    const [cartItems, setCartItems] =
-        useState<CartItem[]>(initialCartItems);
+    const { cartItems, updateQuantity, removeItem } = useCart();
 
     const [paymentMethod, setPaymentMethod] =
         useState("esewa");
 
     const [promoCode, setPromoCode] = useState("");
-
-    /* ========================================
-       QUANTITY
-    ======================================== */
-
-    const updateQuantity = (
-        id: number,
-        change: number
-    ) => {
-        setCartItems((items) =>
-            items.map((item) =>
-                item.id === id
-                    ? {
-                        ...item,
-                        quantity: Math.max(
-                            1,
-                            item.quantity + change
-                        ),
-                    }
-                    : item
-            )
-        );
-    };
-
-    /* ========================================
-       REMOVE ITEM
-    ======================================== */
-
-    const removeItem = (id: number) => {
-        setCartItems((items) =>
-            items.filter((item) => item.id !== id)
-        );
-    };
 
     /* ========================================
        PRICE CALCULATIONS

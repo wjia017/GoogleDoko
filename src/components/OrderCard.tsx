@@ -2,17 +2,9 @@ import {
     ChevronRight,
     CalendarDays,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
-export interface Order {
-    id: string;
-    status: "Delivered" | "Processing" | "Shipped" | "Cancelled";
-    date: string;
-    items: number;
-    total: number;
-    image: string;
-    category: string;
-    deliveryDate: string;
-}
+import type { Order } from "../data/orders";
 
 interface OrderCardProps {
     order: Order;
@@ -60,11 +52,15 @@ function OrderCard({ order }: OrderCardProps) {
             </div>
 
             {/* Middle */}
-            <div className="order-delivery">
+            <div className={`order-delivery ${order.status.toLowerCase()}`}>
 
                 <strong>{order.status}</strong>
 
-                <span>Delivered on</span>
+                <span>
+                    {order.status === "Delivered"
+                        ? "Delivered on"
+                        : "Est Delivered on"}
+                </span>
 
                 <span>{order.deliveryDate}</span>
 
@@ -73,17 +69,20 @@ function OrderCard({ order }: OrderCardProps) {
             {/* Right side */}
             <div className="order-card-actions">
 
-                <ChevronRight
-                    size={26}
+                <Link
+                    to={`/orders/${order.id}`}
                     className="order-arrow"
-                />
+                    aria-label={`View order ${order.id} details`}
+                >
+                    <ChevronRight size={26} />
+                </Link>
 
-                <button
-                    type="button"
+                <Link
+                    to={`/orders/${order.id}`}
                     className="view-details-button"
                 >
                     View Details
-                </button>
+                </Link>
 
             </div>
 

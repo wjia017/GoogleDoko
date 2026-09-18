@@ -1,4 +1,5 @@
 import CategoryCard from "./CategoryCard";
+import { Link } from "react-router-dom";
 
 const categories = [
   {
@@ -8,6 +9,7 @@ const categories = [
     image: "/src/assets/images/categories/fruits.jpg",
     icon: "fruits" as const,
     theme: "orange" as const,
+    to: "/categories?category=Fruits",
   },
   {
     id: 2,
@@ -16,6 +18,7 @@ const categories = [
     image: "/src/assets//images/categories/spices.jpg",
     icon: "spices" as const,
     theme: "green" as const,
+    to: "/categories?category=Spices",
   },
   {
     id: 3,
@@ -24,6 +27,7 @@ const categories = [
     image: "/src/assets//images/categories/vegetables.jpg",
     icon: "vegetables" as const,
     theme: "red" as const,
+    to: "/categories?category=Vegetables",
   },
   {
     id: 4,
@@ -32,6 +36,7 @@ const categories = [
     image: "/src/assets//images/categories/others.jpg",
     icon: "others" as const,
     theme: "teal" as const,
+    to: "/categories",
   },
 ];
 
@@ -41,9 +46,9 @@ function Categories() {
       <div className="section-header">
         <h2>Shop By Categories</h2>
 
-        <button type="button">
+        <Link to="/categories" className="section-view-all">
           View all
-        </button>
+        </Link>
       </div>
 
       <div className="categories-grid">
@@ -55,6 +60,7 @@ function Categories() {
             image={category.image}
             icon={category.icon}
             theme={category.theme}
+            to={category.to}
           />
         ))}
       </div>

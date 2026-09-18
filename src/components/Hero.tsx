@@ -1,4 +1,5 @@
 import { MapPin, Leaf, Truck, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Hero() {
   return (
@@ -22,14 +23,14 @@ function Hero() {
           {/* Buttons */}
           <div className="hero-buttons">
 
-            <button className="primary-button">
+            <Link to="/shop" className="primary-button">
               Shop Now
-            </button>
+            </Link>
 
-            <button className="secondary-button">
+            <Link to="/places" className="secondary-button">
               <MapPin size={22} />
               Explore Local Places
-            </button>
+            </Link>
 
           </div>
 

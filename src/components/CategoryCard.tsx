@@ -4,6 +4,7 @@ import {
   Carrot,
   ShoppingBag,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface CategoryCardProps {
   name: string;
@@ -11,6 +12,7 @@ interface CategoryCardProps {
   image: string;
   icon: "fruits" | "spices" | "vegetables" | "others";
   theme: "orange" | "green" | "red" | "teal";
+  to: string;
 }
 
 const icons = {
@@ -26,11 +28,12 @@ function CategoryCard({
   image,
   icon,
   theme,
+  to,
 }: CategoryCardProps) {
   const Icon = icons[icon];
 
   return (
-    <article className={`category-card ${theme}`}>
+    <Link to={to} className={`category-card ${theme}`}>
       {/* Image */}
       <div className="category-image">
         <img src={image} alt={name} />
@@ -47,7 +50,7 @@ function CategoryCard({
           <p>{description}</p>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
 

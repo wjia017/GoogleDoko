@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
     HelpCircle,
     Truck,
@@ -8,51 +9,9 @@ import TopBar from "../components/TopBar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import OrderCard from "../components/OrderCard";
+import SupportModal from "../components/SupportModal";
 
-import type { Order } from "../components/OrderCard";
-
-const orders: Order[] = [
-    {
-        id: "LM20260830",
-        status: "Delivered",
-        date: "30 Aug 2026, 10:24 AM",
-        items: 5,
-        total: 560,
-        image: "/images/products/apple.png",
-        category: "Fruits & Vegetables",
-        deliveryDate: "2 Sep 2026",
-    },
-    {
-        id: "LM20260830",
-        status: "Processing",
-        date: "30 Aug 2026, 10:24 AM",
-        items: 5,
-        total: 560,
-        image: "/images/products/apple.png",
-        category: "Fruits & Vegetables",
-        deliveryDate: "2 Sep 2026",
-    },
-    {
-        id: "LM20260830",
-        status: "Shipped",
-        date: "30 Aug 2026, 10:24 AM",
-        items: 5,
-        total: 560,
-        image: "/images/products/apple.png",
-        category: "Fruits & Vegetables",
-        deliveryDate: "2 Sep 2026",
-    },
-    {
-        id: "LM20260830",
-        status: "Delivered",
-        date: "30 Aug 2026, 10:24 AM",
-        items: 5,
-        total: 560,
-        image: "/images/products/apple.png",
-        category: "Fruits & Vegetables",
-        deliveryDate: "2 Sep 2026",
-    },
-];
+import { useOrders } from "../context/OrdersContext";
 
 const tabs = [
     "All Orders",
@@ -63,7 +22,9 @@ const tabs = [
 ];
 
 function Orders() {
+    const { orders } = useOrders();
     const [activeTab, setActiveTab] = useState("All Orders");
+    const [supportOpen, setSupportOpen] = useState(false);
 
     const filteredOrders =
         activeTab === "All Orders"
@@ -182,7 +143,10 @@ function Orders() {
 
                             </div>
 
-                            <button type="button">
+                            <button
+                                type="button"
+                                onClick={() => setSupportOpen(true)}
+                            >
                                 Contact Support →
                             </button>
 
@@ -204,9 +168,9 @@ function Orders() {
                                     doorstep
                                 </p>
 
-                                <button type="button">
+                                <Link to="/delivery">
                                     Learn more
-                                </button>
+                                </Link>
 
                             </div>
 
@@ -221,6 +185,11 @@ function Orders() {
                 </section>
 
             </main>
+
+            <SupportModal
+                open={supportOpen}
+                onClose={() => setSupportOpen(false)}
+            />
 
             <Footer />
         </>

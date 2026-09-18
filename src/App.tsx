@@ -4,62 +4,42 @@ import Home from "./pages/Home";
 import CategoriesPage from "./pages/CategoriesPage";
 import Orders from "./pages/Orders";
 import Cart from "./pages/Cart";
+import Profile from "./pages/profile";
+import ProductDetails from "./pages/ProductDetails";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* ================================
-            HOME
-        ================================= */}
-
         <Route
           path="/"
           element={<Home />}
         />
-
-
-        {/* ================================
-            CATEGORIES
-        ================================= */}
 
         <Route
           path="/categories"
           element={<CategoriesPage />}
         />
 
-
-        {/* ================================
-            ORDERS
-        ================================= */}
-
         <Route
           path="/orders"
           element={<Orders />}
         />
-
-
-        {/* ================================
-            CART
-        ================================= */}
 
         <Route
           path="/cart"
           element={<Cart />}
         />
 
-
-        {/* ================================
-            TEMPORARY PAGES
-            Build these later
-        ================================= */}
+        <Route
+          path="/account"
+          element={<Profile />}
+        />
 
         <Route
-          path="/about"
-          element={
-            <h1>About Us - Coming Soon</h1>
-          }
+          path="/product/:productId"
+          element={<ProductDetails />}
         />
 
         <Route
@@ -70,16 +50,11 @@ function App() {
         />
 
         <Route
-          path="/account"
+          path="/about"
           element={
-            <h1>Account - Coming Soon</h1>
+            <h1>About Us - Coming Soon</h1>
           }
         />
-
-
-        {/* ================================
-            404 PAGE
-        ================================= */}
 
         <Route
           path="*"

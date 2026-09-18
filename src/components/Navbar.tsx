@@ -4,11 +4,75 @@ import {
   UserRound,
   ShoppingCart,
   ChevronDown,
+  MapPin,
 } from "lucide-react";
 
-import { Link, NavLink } from "react-router-dom";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+
+import { searchPlaces, searchProducts } from "../data/search";
+import { useWishlist } from "../context/WishlistContext";
 
 function Navbar() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { wishlist } = useWishlist();
+  const wishlistCount = wishlist.length;
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const searchWrapRef = useRef<HTMLFormElement>(null);
+
+  const categoriesActive =
+    location.pathname.startsWith("/categories") ||
+    location.pathname === "/places";
+
+  useEffect(() => {
+    if (location.pathname === "/search") {
+      setQuery(searchParams.get("q") ?? "");
+    }
+  }, [location.pathname, searchParams]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        searchWrapRef.current &&
+        !searchWrapRef.current.contains(event.target as Node)
+      ) {
+        setSuggestionsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const productSuggestions = useMemo(
+    () => searchProducts(query).slice(0, 5),
+    [query],
+  );
+  const placeSuggestions = useMemo(
+    () => searchPlaces(query).slice(0, 4),
+    [query],
+  );
+  const showSuggestions =
+    suggestionsOpen &&
+    query.trim().length > 0 &&
+    (productSuggestions.length > 0 || placeSuggestions.length > 0);
+
+  function submitSearch(event: FormEvent) {
+    event.preventDefault();
+    const trimmed = query.trim();
+
+    if (!trimmed) {
+      return;
+    }
+
+    setSuggestionsOpen(false);
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+  }
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -31,6 +95,7 @@ function Navbar() {
 
           <NavLink
             to="/"
+            end
             className={({ isActive }) =>
               isActive ? "active" : ""
             }
@@ -39,15 +104,39 @@ function Navbar() {
           </NavLink>
 
 
-          <NavLink
-            to="/categories"
-            className={({ isActive }) =>
-              `category-link ${isActive ? "active" : ""}`
-            }
+          <div
+            className={`nav-dropdown ${categoriesOpen ? "open" : ""}`}
+            onMouseEnter={() => setCategoriesOpen(true)}
+            onMouseLeave={() => setCategoriesOpen(false)}
           >
-            Categories
-            <ChevronDown size={16} />
-          </NavLink>
+            <button
+              type="button"
+              className={`category-link ${categoriesActive ? "active" : ""}`}
+              aria-expanded={categoriesOpen}
+              aria-haspopup="true"
+              onClick={() => setCategoriesOpen((open) => !open)}
+            >
+              Categories
+              <ChevronDown size={16} />
+            </button>
+
+            <div className="nav-dropdown-menu">
+              <div className="nav-dropdown-panel">
+                <NavLink
+                  to="/places"
+                  onClick={() => setCategoriesOpen(false)}
+                >
+                  Categories by place
+                </NavLink>
+                <NavLink
+                  to="/categories"
+                  onClick={() => setCategoriesOpen(false)}
+                >
+                  Categories by product
+                </NavLink>
+              </div>
+            </div>
+          </div>
 
 
           <NavLink
@@ -87,18 +176,73 @@ function Navbar() {
             SEARCH
         ================================= */}
 
-        <div className="search-container">
+        <form
+          className="search-wrap"
+          ref={searchWrapRef}
+          onSubmit={submitSearch}
+          role="search"
+        >
+          <div className="search-container">
+            <input
+              type="search"
+              value={query}
+              placeholder="Search products or places"
+              aria-label="Search products or places"
+              autoComplete="off"
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setSuggestionsOpen(true);
+              }}
+              onFocus={() => setSuggestionsOpen(true)}
+            />
 
-          <input
-            type="text"
-            placeholder="Search products or places"
-          />
+            <button type="submit" aria-label="Search">
+              <Search size={22} />
+            </button>
+          </div>
 
-          <button type="button" aria-label="Search">
-            <Search size={22} />
-          </button>
+          {showSuggestions && (
+            <div className="search-suggestions">
+              {placeSuggestions.length > 0 && (
+                <div className="search-suggestion-group">
+                  <p>Places</p>
+                  {placeSuggestions.map((place) => (
+                    <Link
+                      key={place.origin}
+                      to={`/categories?place=${encodeURIComponent(place.origin)}`}
+                      onClick={() => setSuggestionsOpen(false)}
+                    >
+                      <MapPin size={16} />
+                      <span>
+                        {place.name}
+                        <small>{place.origin}</small>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
 
-        </div>
+              {productSuggestions.length > 0 && (
+                <div className="search-suggestion-group">
+                  <p>Products</p>
+                  {productSuggestions.map((product) => (
+                    <Link
+                      key={product.id}
+                      to={`/product/${product.id}`}
+                      onClick={() => setSuggestionsOpen(false)}
+                    >
+                      <img src={product.image} alt="" />
+                      <span>
+                        {product.name}
+                        <small>{product.origin}</small>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </form>
 
 
         {/* ================================
@@ -109,16 +253,28 @@ function Navbar() {
 
           <Link
             to="/wishlist"
-            className="nav-action"
+            className={`nav-action ${location.pathname === "/wishlist" ? "active" : ""}`}
+            aria-label={
+              wishlistCount > 0
+                ? `Wishlist, ${wishlistCount} saved ${wishlistCount === 1 ? "product" : "products"}`
+                : "Wishlist"
+            }
           >
-            <Heart size={23} />
+            <span className="nav-action-icon">
+              <Heart size={23} />
+              {wishlistCount > 0 && (
+                <span className="nav-count-badge">
+                  {wishlistCount > 99 ? "99+" : wishlistCount}
+                </span>
+              )}
+            </span>
             <span>Wishlist</span>
           </Link>
 
 
           <Link
             to="/account"
-            className="nav-action"
+            className={`nav-action ${location.pathname === "/account" ? "active" : ""}`}
           >
             <UserRound size={23} />
             <span>Account</span>

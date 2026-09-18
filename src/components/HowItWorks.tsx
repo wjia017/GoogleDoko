@@ -41,7 +41,7 @@ const steps = [
         fresh
       </>
     ),
-    image: "/images/how-it-works/packaging.png",
+    image: "/src/assets/images/how-it-works/packaging.jpg",
   },
   {
     id: 4,
@@ -53,7 +53,7 @@ const steps = [
         to your home
       </>
     ),
-    image: "/images/how-it-works/delivery.png",
+    image: "/src/assets/images/how-it-works/delivery.jpg",
   },
 ];
 

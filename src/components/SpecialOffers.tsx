@@ -1,4 +1,5 @@
 import OfferCard from "./OfferCard";
+import { Link } from "react-router-dom";
 
 import explorePlacesImage from "../assets/images/offers/explore-places.jpg";
 import popularNearYouImage from "../assets/images/offers/popular-near-you.jpg";
@@ -12,6 +13,7 @@ const offers = [
     buttonText: "Explore Now",
     image: explorePlacesImage,
     theme: "green" as const,
+    to: "/places",
   },
 
   {
@@ -22,6 +24,7 @@ const offers = [
     image: popularNearYouImage,
     theme: "yellow" as const,
     badge: "Trending Now",
+    to: "/shop",
   },
 
   {
@@ -32,6 +35,7 @@ const offers = [
     image: seasonalImage,
     theme: "blue" as const,
     badge: "Best",
+    to: "/shop",
   },
 ];
 
@@ -43,9 +47,9 @@ function SpecialOffers() {
 
         <h2>Special Offers</h2>
 
-        <button type="button">
+        <Link to="/shop" className="section-view-all">
           View all
-        </button>
+        </Link>
 
       </div>
 
@@ -61,6 +65,7 @@ function SpecialOffers() {
             image={offer.image}
             theme={offer.theme}
             badge={offer.badge}
+            to={offer.to}
           />
         ))}
 

@@ -3,20 +3,35 @@ import {
   Star,
   MapPin,
   UserRound,
-  Apple,
-  Leaf,
-  Carrot,
+  Heart,
 } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+
 import type { Product } from "../data/products";
+import { getProductBadge } from "../data/productBadges";
+import { useCart } from "../context/CartContext";
+import { useOrders } from "../context/OrdersContext";
+import { useWishlist } from "../context/WishlistContext";
 
 interface ProductCardProps {
   product: Product;
 }
 
 function ProductCard({ product }: ProductCardProps) {
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { addOrder } = useOrders();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const saved = isInWishlist(product.id);
+  const badge = getProductBadge(product.name);
+  const BadgeIcon = badge.icon;
+
   return (
-    <article className="product-card">
+    <article
+      className="product-card"
+      onClick={() => navigate(`/product/${product.id}`)}
+    >
 
       {/* Product Image */}
       <div className="product-image-container">
@@ -27,21 +42,25 @@ function ProductCard({ product }: ProductCardProps) {
           className="product-image"
         />
 
+        <button
+          type="button"
+          className={`product-wishlist-button ${saved ? "active" : ""}`}
+          aria-label={
+            saved
+              ? `Remove ${product.name} from wishlist`
+              : `Add ${product.name} to wishlist`
+          }
+          onClick={(event) => {
+            event.stopPropagation();
+            toggleWishlist(product);
+          }}
+        >
+          <Heart size={18} fill={saved ? "currentColor" : "none"} />
+        </button>
+
         {/* Category Icon */}
-        <div className={`product-category-icon ${product.category.toLowerCase()}`}>
-
-          {product.category === "Honey" ? (
-            <Leaf size={38} strokeWidth={2} />
-          ) : product.name === "Apple" ? (
-            <Apple size={38} strokeWidth={2} />
-          ) : product.name === "Orange" ? (
-            <Apple size={38} strokeWidth={2} />
-          ) : product.name === "Avocado" ? (
-            <Leaf size={38} strokeWidth={2} />
-          ) : (
-            <Carrot size={38} strokeWidth={2} />
-          )}
-
+        <div className={`product-category-icon ${badge.className}`}>
+          <BadgeIcon size={38} strokeWidth={2} />
         </div>
 
       </div>
@@ -137,6 +156,11 @@ function ProductCard({ product }: ProductCardProps) {
           <button
             type="button"
             className="buy-button"
+            onClick={(event) => {
+              event.stopPropagation();
+              addOrder(product);
+              navigate("/orders");
+            }}
           >
             Buy Now
           </button>
@@ -145,6 +169,11 @@ function ProductCard({ product }: ProductCardProps) {
             type="button"
             className="add-cart-button"
             aria-label={`Add ${product.name} to cart`}
+            onClick={(event) => {
+              event.stopPropagation();
+              addToCart(product);
+              navigate("/cart");
+            }}
           >
             <ShoppingCart size={23} />
           </button>

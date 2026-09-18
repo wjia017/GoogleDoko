@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Leaf } from "lucide-react";
+import { useSearchParams, Link } from "react-router-dom";
 
 import TopBar from "../components/TopBar";
 import Navbar from "../components/Navbar";
@@ -26,18 +27,40 @@ const categoryOptions: Category[] = [
 ];
 
 function CategoriesPage() {
+    const [searchParams] = useSearchParams();
+    const categoryFromUrl = searchParams.get("category");
+    const placeFromUrl = searchParams.get("place");
+
     const [selectedCategory, setSelectedCategory] =
-        useState<Category>("All");
+        useState<Category>(
+            categoryFromUrl &&
+            categoryOptions.includes(categoryFromUrl as Category)
+                ? (categoryFromUrl as Category)
+                : "All",
+        );
+
+    useEffect(() => {
+        if (
+            categoryFromUrl &&
+            categoryOptions.includes(categoryFromUrl as Category)
+        ) {
+            setSelectedCategory(categoryFromUrl as Category);
+        }
+    }, [categoryFromUrl]);
 
     const filteredProducts = useMemo(() => {
+        const byPlace = placeFromUrl
+            ? products.filter((product) => product.origin === placeFromUrl)
+            : products;
+
         if (selectedCategory === "All") {
-            return products;
+            return byPlace;
         }
 
-        return products.filter(
+        return byPlace.filter(
             (product) => product.category === selectedCategory,
         );
-    }, [selectedCategory]);
+    }, [placeFromUrl, selectedCategory]);
 
     return (
         <>
@@ -69,7 +92,7 @@ function CategoriesPage() {
 
                         <div className="categories-banner-image">
                             <img
-                                src="/images/categories-banner.png"
+                                src="/src/assets/images/categories/categories-banner.jpg?v=2"
                                 alt="Fresh vegetables in a basket"
                             />
                         </div>
@@ -106,13 +129,17 @@ function CategoriesPage() {
 
                     <div className="all-products-heading">
                         <h2>
-                            {selectedCategory === "All"
-                                ? "All Products"
-                                : selectedCategory}
+                            {placeFromUrl
+                                ? placeFromUrl.split(",")[0].trim()
+                                : selectedCategory === "All"
+                                    ? "All Products"
+                                    : selectedCategory}
                         </h2>
 
                         <p>
-                            Fresh products, better living
+                            {placeFromUrl
+                                ? `Products from ${placeFromUrl}`
+                                : "Fresh products, better living"}
                         </p>
                     </div>
 
@@ -172,16 +199,16 @@ function CategoriesPage() {
                                 Everything you need for a healthier lifestyle.
                             </p>
 
-                            <button type="button">
+                            <Link to="/shop" className="category-promo-button">
                                 Buy Now
                                 <ArrowRight size={17} />
-                            </button>
+                            </Link>
 
                         </div>
 
                         <div className="category-promo-image">
                             <img
-                                src="/images/category-promo.png"
+                                src="/src/assets/images/categories/category-promo.jpg?v=2"
                                 alt="Fresh vegetables and fruits"
                             />
                         </div>

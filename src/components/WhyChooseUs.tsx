@@ -3,31 +3,31 @@ const reasons = [
     id: 1,
     title: "100 % Organic",
     description: "No Harmful Chemicals",
-    image: "/images/why-choose-us/organic.png",
+    image: "/src/assets/images/why-choose-us/organic.jpg",
   },
   {
     id: 2,
     title: "Local Farmers",
     description: "Support local livelihood",
-    image: "/images/why-choose-us/farmers.png",
+    image: "/src/assets/images/why-choose-us/farmers.jpg",
   },
   {
     id: 3,
     title: "Fresh & Natural",
     description: "Fresh to table",
-    image: "/images/why-choose-us/fresh.png",
+    image: "/src/assets/images/why-choose-us/fresh.jpg",
   },
   {
     id: 4,
     title: "Quality Assured",
     description: "Strict quality check",
-    image: "/images/why-choose-us/quality.png",
+    image: "/src/assets/images/why-choose-us/quality.jpg",
   },
   {
     id: 5,
     title: "Safe Delivery",
     description: "Hygienic & timely",
-    image: "/images/why-choose-us/delivery.png",
+    image: "/src/assets/images/why-choose-us/delivery.jpg",
   },
 ];
 

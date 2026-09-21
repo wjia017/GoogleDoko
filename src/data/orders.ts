@@ -19,6 +19,11 @@ export interface Order {
   category: string;
   deliveryDate: string;
   products: OrderProduct[];
+  recipientName?: string;
+  recipientPhone?: string;
+  deliveryAddress?: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
 }
 
 export const orders: Order[] = [

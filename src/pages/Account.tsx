@@ -1,16 +1,21 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   BadgeCheck,
+  Bell,
   Bike,
   ChevronRight,
-  ClipboardList,
+  Clock3,
+  Coins,
   Gift,
   Heart,
-  HelpCircle,
+  Lock,
   LogOut,
   MapPin,
+  Package,
   PackageCheck,
   ShoppingBag,
+  Star,
   Truck,
   UserRound,
 } from "lucide-react";
@@ -18,8 +23,11 @@ import {
 import TopBar from "../components/TopBar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import AccountSettingsModals from "../components/AccountSettingsModals";
 
-import { useOrders } from "../context/OrdersContext";
+import { useAccount } from "../context/AccountContext";
+import { useWishlist } from "../context/WishlistContext";
+import { statusToQuery } from "../data/mockOrders";
 
 function countByStatus(
   orders: { status: string }[],
@@ -30,7 +38,12 @@ function countByStatus(
 
 function Account() {
   const navigate = useNavigate();
-  const { orders } = useOrders();
+  const { user, orders, points, logout } =
+    useAccount();
+  const { wishlist } = useWishlist();
+  const [modal, setModal] = useState<
+    "password" | "notifications" | "invite" | null
+  >(null);
 
   const pending = countByStatus(orders, "Pending");
   const processing = countByStatus(orders, "Processing");
@@ -49,45 +62,63 @@ function Account() {
 
           <section className="profile-shell">
             <div className="profile-hero">
-              <div className="profile-avatar" aria-hidden="true" />
+              <div
+                className="profile-avatar"
+                aria-hidden="true"
+                style={
+                  user.photo
+                    ? {
+                        backgroundImage: `url(${user.photo})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }
+                    : undefined
+                }
+              >
+                {user.photo ? null : <UserRound size={48} strokeWidth={1.6} />}
+              </div>
 
               <div>
-                <h2>Lahana Lawaju</h2>
+                <h2>
+                  {user.firstName} {user.lastName}
+                </h2>
                 <p>
                   <MapPin size={16} />
-                  Kathmandu, Nepal
+                  {user.location}
                 </p>
-                <span className="profile-verified">
-                  <BadgeCheck size={14} />
-                  Verified Customer
-                </span>
+                {user.verified ? (
+                  <span className="profile-verified">
+                    <BadgeCheck size={14} />
+                    Verified Customer
+                  </span>
+                ) : null}
               </div>
             </div>
 
             <div className="profile-stats">
-              <Link to="/orders" className="profile-stat">
+              <Link to="/account/orders" className="profile-stat">
                 <ShoppingBag size={22} />
-                <strong>24</strong>
+                <strong>{orders.length}</strong>
                 <span>Total Orders</span>
                 <em>View all &gt;</em>
               </Link>
 
-              <Link to="/wishlist" className="profile-stat">
+              <Link to="/account/wishlist" className="profile-stat">
                 <Heart size={22} />
-                <strong>12</strong>
+                <strong>{wishlist.length}</strong>
                 <span>Wishlist</span>
                 <em>View all &gt;</em>
               </Link>
 
-              <Link to="/account" className="profile-stat">
+              <Link to="/account/addresses" className="profile-stat">
                 <MapPin size={22} />
                 <strong className="profile-stat-label">Address</strong>
                 <em>Manage &gt;</em>
               </Link>
 
-              <Link to="/account" className="profile-stat">
-                <ClipboardList size={22} />
-                <strong>Rs 320</strong>
+              <Link to="/account/rewards" className="profile-stat">
+                <Coins size={22} />
+                <strong>Rs {points}</strong>
                 <span>Reward Points</span>
                 <em>Redeem &gt;</em>
               </Link>
@@ -98,53 +129,53 @@ function Account() {
                 <article className="profile-panel">
                   <div className="profile-panel-head">
                     <h3>My Orders</h3>
-                    <Link to="/orders">
+                    <Link to="/account/orders">
                       View All Orders
                       <ChevronRight size={16} />
                     </Link>
                   </div>
 
                   <div className="profile-order-status">
-                    <div>
+                    <Link to={`/account/orders?status=${statusToQuery("Pending")}`}>
                       <span className="profile-status-icon">
-                        <ShoppingBag size={20} />
-                        {pending > 0 ? <b>{pending}</b> : <b>2</b>}
+                        <Clock3 size={20} />
+                        <b>{pending}</b>
                       </span>
                       <small>Pending</small>
-                    </div>
-                    <div>
+                    </Link>
+                    <Link to={`/account/orders?status=${statusToQuery("Processing")}`}>
                       <span className="profile-status-icon">
-                        <ShoppingBag size={20} />
-                        {processing > 0 ? <b>{processing}</b> : <b>3</b>}
+                        <Package size={20} />
+                        <b>{processing}</b>
                       </span>
                       <small>Processing</small>
-                    </div>
-                    <div>
+                    </Link>
+                    <Link to={`/account/orders?status=${statusToQuery("Shipped")}`}>
                       <span className="profile-status-icon">
                         <Truck size={20} />
-                        {shipped > 0 ? <b>{shipped}</b> : <b>1</b>}
+                        <b>{shipped}</b>
                       </span>
                       <small>Shipped</small>
-                    </div>
-                    <div>
+                    </Link>
+                    <Link to={`/account/orders?status=${statusToQuery("Out for Delivery")}`}>
                       <span className="profile-status-icon peach">
                         <Bike size={20} />
-                        {outForDelivery > 0 ? <b>{outForDelivery}</b> : <b>1</b>}
+                        <b>{outForDelivery}</b>
                       </span>
                       <small>Out for Delivery</small>
-                    </div>
-                    <div>
+                    </Link>
+                    <Link to={`/account/orders?status=${statusToQuery("Delivered")}`}>
                       <span className="profile-status-icon">
                         <PackageCheck size={20} />
-                        {delivered > 0 ? <b>{delivered}</b> : <b>2</b>}
+                        <b>{delivered}</b>
                       </span>
                       <small>Delivered</small>
-                    </div>
+                    </Link>
                   </div>
                 </article>
 
                 <article className="profile-panel profile-menu">
-                  <Link to="/account" className="profile-menu-row">
+                  <Link to="/account/profile" className="profile-menu-row">
                     <span className="profile-menu-icon mint">
                       <UserRound size={18} />
                     </span>
@@ -155,7 +186,7 @@ function Account() {
                     <ChevronRight size={18} />
                   </Link>
 
-                  <Link to="/account" className="profile-menu-row">
+                  <Link to="/account/addresses" className="profile-menu-row">
                     <span className="profile-menu-icon peach">
                       <MapPin size={18} />
                     </span>
@@ -166,9 +197,9 @@ function Account() {
                     <ChevronRight size={18} />
                   </Link>
 
-                  <Link to="/account" className="profile-menu-row">
+                  <Link to="/account/reviews" className="profile-menu-row">
                     <span className="profile-menu-icon mint">
-                      <ClipboardList size={18} />
+                      <Star size={18} />
                     </span>
                     <span>
                       <strong>My Reviews</strong>
@@ -177,21 +208,13 @@ function Account() {
                     <ChevronRight size={18} />
                   </Link>
 
-                  <Link to="/about" className="profile-menu-row">
-                    <span className="profile-menu-icon peach">
-                      <HelpCircle size={18} />
-                    </span>
-                    <span>
-                      <strong>About Us</strong>
-                      <small>Learn more about our mission</small>
-                    </span>
-                    <ChevronRight size={18} />
-                  </Link>
-
                   <button
                     type="button"
                     className="profile-menu-row"
-                    onClick={() => navigate("/")}
+                    onClick={() => {
+                      logout();
+                      navigate("/login");
+                    }}
                   >
                     <span className="profile-menu-icon mint">
                       <LogOut size={18} />
@@ -209,24 +232,26 @@ function Account() {
                 <article className="profile-panel profile-settings">
                   <h3>Account Settings</h3>
 
-                  <button type="button" className="profile-menu-row">
-                    <span className="profile-settings-dot" />
+                  <button
+                    type="button"
+                    className="profile-menu-row"
+                    onClick={() => setModal("password")}
+                  >
+                    <span className="profile-menu-icon mint">
+                      <Lock size={18} />
+                    </span>
                     Change Password
                     <ChevronRight size={18} />
                   </button>
-                  <button type="button" className="profile-menu-row">
-                    <span className="profile-settings-dot" />
+                  <button
+                    type="button"
+                    className="profile-menu-row"
+                    onClick={() => setModal("notifications")}
+                  >
+                    <span className="profile-menu-icon peach">
+                      <Bell size={18} />
+                    </span>
                     Notification Settings
-                    <ChevronRight size={18} />
-                  </button>
-                  <button type="button" className="profile-menu-row">
-                    <span className="profile-settings-dot" />
-                    Language
-                    <ChevronRight size={18} />
-                  </button>
-                  <button type="button" className="profile-menu-row">
-                    <span className="profile-settings-dot" />
-                    Dark Mode
                     <ChevronRight size={18} />
                   </button>
                 </article>
@@ -235,7 +260,9 @@ function Account() {
                   <div>
                     <h3>Invite Friends and get rewards</h3>
                     <p>Invite friends and earn rewards points</p>
-                    <button type="button">Invite Now</button>
+                    <button type="button" onClick={() => setModal("invite")}>
+                      Invite Now
+                    </button>
                   </div>
                   <Gift size={72} strokeWidth={1.4} />
                 </article>
@@ -246,6 +273,14 @@ function Account() {
       </main>
 
       <Footer />
+
+      <AccountSettingsModals
+        passwordOpen={modal === "password"}
+        notificationsOpen={modal === "notifications"}
+        languageOpen={false}
+        inviteOpen={modal === "invite"}
+        onClose={() => setModal(null)}
+      />
     </>
   );
 }

@@ -11,13 +11,17 @@ import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { searchPlaces, searchProducts } from "../data/search";
+import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
+import LogoMark from "./LogoMark";
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { cartItems } = useCart();
   const { wishlist } = useWishlist();
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const wishlistCount = wishlist.length;
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -82,7 +86,7 @@ function Navbar() {
         ================================= */}
 
         <Link to="/" className="logo">
-          <div className="logo-icon">🌿</div>
+          <LogoMark className="logo-icon" decorative />
           <span>GoogleDoko</span>
         </Link>
 
@@ -154,9 +158,21 @@ function Navbar() {
             className={({ isActive }) =>
               `cart-link ${isActive ? "active" : ""}`
             }
+            aria-label={
+              cartCount > 0
+                ? `Cart, ${cartCount} ${cartCount === 1 ? "product" : "products"}`
+                : "Cart"
+            }
           >
             Cart
-            <ShoppingCart size={19} />
+            <span className="nav-action-icon">
+              <ShoppingCart size={19} />
+              {cartCount > 0 && (
+                <span className="nav-count-badge">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </span>
           </NavLink>
 
 

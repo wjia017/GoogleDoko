@@ -1,4 +1,3 @@
-import { ArrowRight, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface OfferCardProps {
@@ -7,62 +6,18 @@ interface OfferCardProps {
   buttonText: string;
   image: string;
   theme: "green" | "yellow" | "blue";
-  badge?: string;
   to: string;
 }
 
-function OfferCard({
-  title,
-  description,
-  buttonText,
-  image,
-  theme,
-  badge,
-  to,
-}: OfferCardProps) {
+function OfferCard({ title, description, buttonText, image, theme, to }: OfferCardProps) {
   return (
     <article className={`offer-card ${theme}`}>
-
-      {/* Background image */}
-      <img
-        src={image}
-        alt=""
-        className="offer-background"
-      />
-
-
-      {/* Content */}
-      <div className="offer-content">
-
-        {badge && (
-          <div className="offer-badge">
-            <Flame size={18} />
-            <span>{badge}</span>
-          </div>
-        )}
-
-
-        <h3>
-          {title}
-        </h3>
-
-
-        <p>
-          {description}
-        </p>
-
-
-        <Link
-          to={to}
-          className="offer-button"
-        >
-          <span>{buttonText}</span>
-
-          <ArrowRight size={20} />
-        </Link>
-
-      </div>
-
+      <Link to={to} className="offer-card-link">
+        <img src={image} alt="" className="offer-background" />
+        <span className="offer-sr-only">
+          {title}. {description}. {buttonText}.
+        </span>
+      </Link>
     </article>
   );
 }

@@ -1,11 +1,26 @@
+import { useState } from "react";
+
 import TopBar from "../components/TopBar";
 import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
 import Footer from "../components/Footer";
+import Pagination, {
+  paginateItems,
+} from "../components/Pagination";
 
 import { products } from "../data/products";
 
 function Shop() {
+  const [page, setPage] = useState(1);
+  const paged = paginateItems(products, page);
+
+  function changePage(nextPage: number) {
+    setPage(nextPage);
+    document
+      .querySelector(".all-products-section")
+      ?.scrollIntoView({ behavior: "auto", block: "start" });
+  }
+
   return (
     <>
       <TopBar />
@@ -30,10 +45,16 @@ function Shop() {
           </div>
 
           <div className="categories-products-grid">
-            {products.map((product) => (
+            {paged.items.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
+
+          <Pagination
+            page={paged.current}
+            totalPages={paged.totalPages}
+            onChange={changePage}
+          />
         </section>
       </main>
 

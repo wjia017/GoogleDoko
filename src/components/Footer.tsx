@@ -14,6 +14,7 @@ import {
   Mail,
   Navigation,
 } from "lucide-react";
+import LogoMark from "./LogoMark";
 
 function Footer() {
   return (
@@ -27,7 +28,7 @@ function Footer() {
 
           <div className="footer-column footer-brand">
             <div className="footer-logo">
-              <div className="footer-logo-icon">🌿</div>
+              <LogoMark className="footer-logo-icon" decorative />
 
               <span>GoogleDoko</span>
             </div>
@@ -57,7 +58,7 @@ function Footer() {
             <div className="footer-tagline">
               <span className="tagline-line"></span>
 
-              <span className="tagline-leaf">🌿</span>
+              <LogoMark className="tagline-leaf" decorative />
 
               <span className="tagline-line"></span>
 
@@ -75,7 +76,7 @@ function Footer() {
             <ul className="footer-links">
               <li>
                 <UserRound size={21} />
-                <span>About our website</span>
+                <span>About Us</span>
               </li>
 
               <li>

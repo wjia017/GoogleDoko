@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -16,13 +17,17 @@ export interface CartItem {
   price: number;
   quantity: number;
   image: string;
+  origin?: string;
+  seller?: string;
 }
 
 interface CartContextValue {
   cartItems: CartItem[];
+  toast: string | null;
   addToCart: (product: Product, quantity?: number) => void;
   updateQuantity: (id: string, change: number) => void;
   removeItem: (id: string) => void;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -40,14 +45,21 @@ function readCart(): CartItem[] {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>(readCart);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<number>(0);
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(cartItems));
   }, [cartItems]);
 
+  useEffect(() => {
+    return () => window.clearTimeout(toastTimer.current);
+  }, []);
+
   const value = useMemo<CartContextValue>(
     () => ({
       cartItems,
+      toast,
       addToCart: (product, quantity = 1) => {
         setCartItems((items) => {
           const existing = items.find((item) => item.id === product.id);
@@ -69,9 +81,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
               price: product.price,
               quantity,
               image: product.image,
+              origin: product.origin,
+              seller: product.seller,
             },
           ];
         });
+
+        setToast("Successfully added to cart");
+        window.clearTimeout(toastTimer.current);
+        toastTimer.current = window.setTimeout(() => setToast(null), 2500);
       },
       updateQuantity: (id, change) => {
         setCartItems((items) =>
@@ -88,8 +106,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem: (id) => {
         setCartItems((items) => items.filter((item) => item.id !== id));
       },
+      clearCart: () => setCartItems([]),
     }),
-    [cartItems],
+    [cartItems, toast],
   );
 
   return (

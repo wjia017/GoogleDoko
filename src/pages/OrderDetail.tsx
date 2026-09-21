@@ -344,6 +344,9 @@ function OrderDetail() {
           </section>
 
           <div className="od-actions">
+            <Link to={`/orders/${order.id}/track`} className="od-action-primary">
+              Track Order
+            </Link>
             <button type="button" className="od-action-secondary" onClick={downloadInvoice}>
               <Download size={18} />
               Download Invoice

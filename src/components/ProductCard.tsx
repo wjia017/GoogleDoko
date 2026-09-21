@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import type { Product } from "../data/products";
 import { getProductBadge } from "../data/productBadges";
 import { useCart } from "../context/CartContext";
-import { useOrders } from "../context/OrdersContext";
+import { useCheckout } from "../context/CheckoutContext";
 import { useWishlist } from "../context/WishlistContext";
 
 interface ProductCardProps {
@@ -21,7 +21,7 @@ interface ProductCardProps {
 function ProductCard({ product }: ProductCardProps) {
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { addOrder } = useOrders();
+  const { beginBuyNow } = useCheckout();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const saved = isInWishlist(product.id);
   const badge = getProductBadge(product.name);
@@ -158,8 +158,8 @@ function ProductCard({ product }: ProductCardProps) {
             className="buy-button"
             onClick={(event) => {
               event.stopPropagation();
-              addOrder(product);
-              navigate("/orders");
+              beginBuyNow(product);
+              navigate("/checkout");
             }}
           >
             Buy Now
@@ -172,7 +172,6 @@ function ProductCard({ product }: ProductCardProps) {
             onClick={(event) => {
               event.stopPropagation();
               addToCart(product);
-              navigate("/cart");
             }}
           >
             <ShoppingCart size={23} />

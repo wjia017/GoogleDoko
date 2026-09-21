@@ -1,11 +1,11 @@
+import { Link } from "react-router-dom";
+
 function OrganicPromo() {
   return (
     <section className="organic-promo-section">
       <div className="organic-promo-container">
-
         {/* Left Side - Vegetables */}
         <div className="organic-promo-image-area">
-
           <div className="organic-promo-circle"></div>
 
           <img
@@ -18,34 +18,30 @@ function OrganicPromo() {
             <span>Up to</span>
             <strong>30% off</strong>
           </div>
-
         </div>
 
         {/* Right Side - Content */}
         <div className="organic-promo-content">
-
-          <h2>Organic Vegetables Everyday</h2>
+          <h2>Fresh and Organic Vegetables Every Day</h2>
 
           <h3>
-            Your online resource of healthy recipes.
+            Healthy and fresh products, delivered directly to your doorstep.
           </h3>
 
           <p>
-            Lorem ipsum dolor sit amet consectetur. Bibendum et
-            volutpat vitae nullam aenean tortor dolor eget ipsum.
-            Tincidunt sem sem convallis ut vestibulum sed. Nulla
-            ultrices consectetur in sapien pellentesque.
+            Discover fresh vegetables and quality agricultural products from
+            trusted local farmers. We carefully select our products to provide
+            you with healthy, natural, and affordable choices for your everyday
+            needs.
           </p>
 
-          <button
-            type="button"
+          <Link
+            to="/categories?category=Vegetables"
             className="organic-promo-button"
           >
             Shop Now
-          </button>
-
+          </Link>
         </div>
-
       </div>
     </section>
   );

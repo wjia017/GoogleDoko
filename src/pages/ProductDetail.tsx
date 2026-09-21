@@ -13,7 +13,7 @@ import Footer from "../components/Footer";
 import { products } from "../data/products";
 import { getProductDetails } from "../data/productDetails";
 import { useCart } from "../context/CartContext";
-import { useOrders } from "../context/OrdersContext";
+import { useCheckout } from "../context/CheckoutContext";
 import { useWishlist } from "../context/WishlistContext";
 
 type DetailTab = "about" | "nutrition" | "reviews";
@@ -22,7 +22,7 @@ function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { addOrder } = useOrders();
+  const { beginBuyNow } = useCheckout();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
@@ -183,7 +183,6 @@ function ProductDetail() {
                   className="product-add-cart"
                   onClick={() => {
                     addToCart(product, quantity);
-                    navigate("/cart");
                   }}
                 >
                   Add to Cart
@@ -193,8 +192,8 @@ function ProductDetail() {
                   type="button"
                   className="product-buy-now"
                   onClick={() => {
-                    addOrder(product, quantity);
-                    navigate("/orders");
+                    beginBuyNow(product, quantity);
+                    navigate("/checkout");
                   }}
                 >
                   Buy Now

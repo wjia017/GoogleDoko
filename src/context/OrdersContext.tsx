@@ -14,6 +14,23 @@ import { orders as seedOrders, type Order } from "../data/orders";
 interface OrdersContextValue {
   orders: Order[];
   addOrder: (product: Product, quantity?: number) => void;
+  placeCheckoutOrder: (input: {
+    items: {
+      id: string;
+      name: string;
+      image: string;
+      price: number;
+      quantity: number;
+      origin?: string;
+      seller?: string;
+      unit?: string;
+    }[];
+    recipientName: string;
+    recipientPhone: string;
+    deliveryAddress: string;
+    paymentMethod: string;
+    total: number;
+  }) => Order;
 }
 
 const OrdersContext = createContext<OrdersContextValue | null>(null);
@@ -106,6 +123,48 @@ export function OrdersProvider({ children }: { children: ReactNode }) {
         };
 
         setOrders((current) => [order, ...current]);
+      },
+      placeCheckoutOrder: (input) => {
+        const now = new Date();
+        const delivery = new Date(now);
+        delivery.setDate(delivery.getDate() + 2);
+        const first = input.items[0];
+        const itemsCount = input.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
+        const paid =
+          input.paymentMethod !== "Cash on Delivery" &&
+          input.paymentMethod !== "cod";
+
+        const order: Order = {
+          id: `GD-${now.getFullYear()}-${String(now.getTime()).slice(-5)}`,
+          productId: first?.id ?? "1",
+          status: "Processing",
+          date: formatOrderDate(now),
+          items: itemsCount,
+          total: input.total,
+          image: first?.image ?? "",
+          category: input.items.length > 1 ? "Mixed Order" : (first?.name ?? "Order"),
+          deliveryDate: formatDeliveryDate(delivery),
+          recipientName: input.recipientName,
+          recipientPhone: input.recipientPhone,
+          deliveryAddress: input.deliveryAddress,
+          paymentMethod: input.paymentMethod,
+          paymentStatus: paid ? "Paid" : "Pending (Cash on Delivery)",
+          products: input.items.map((item) => ({
+            name: item.name,
+            image: item.image,
+            price: item.price,
+            quantity: item.quantity,
+            origin: item.origin,
+            seller: item.seller,
+            unit: item.unit,
+          })),
+        };
+
+        setOrders((current) => [order, ...current]);
+        return order;
       },
     }),
     [orders],

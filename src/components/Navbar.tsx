@@ -176,15 +176,6 @@ function Navbar() {
           </NavLink>
 
 
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              isActive ? "active" : ""
-            }
-          >
-            About Us
-          </NavLink>
-
         </div>
 
 

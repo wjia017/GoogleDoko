@@ -3173,6 +3173,13 @@
   color: #292929;
 }
 
+.footer-links a {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  color: inherit;
+}
+
 .footer-links svg {
   flex-shrink: 0;
 

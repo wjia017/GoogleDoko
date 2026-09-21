@@ -1,8 +1,14 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import ScrollToTop from "./components/ScrollToTop";
+import DocumentTitle from "./components/DocumentTitle";
+import CartToast from "./components/CartToast";
+
 import { CartProvider } from "./context/CartContext";
 import { OrdersProvider } from "./context/OrdersContext";
 import { WishlistProvider } from "./context/WishlistContext";
+import { CheckoutProvider } from "./context/CheckoutContext";
+import { AccountProvider } from "./context/AccountContext";
 
 import Home from "./pages/Home";
 import CategoriesPage from "./pages/CategoriesPage";
@@ -17,15 +23,34 @@ import DeliveryInfo from "./pages/DeliveryInfo";
 import About from "./pages/About";
 import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
+import AccountProfile from "./pages/account/AccountProfile";
+import AccountOrders from "./pages/account/AccountOrders";
+import AccountOrderDetail from "./pages/account/AccountOrderDetail";
+import AccountWishlist from "./pages/account/AccountWishlist";
+import AccountAddresses from "./pages/account/AccountAddresses";
+import AccountReviews from "./pages/account/AccountReviews";
+import AccountRewards from "./pages/account/AccountRewards";
+import Login from "./pages/Login";
 import Search from "./pages/Search";
+import CheckoutDelivery from "./pages/CheckoutDelivery";
+import CheckoutPayment from "./pages/CheckoutPayment";
+import CheckoutReview from "./pages/CheckoutReview";
+import CheckoutConfirmation from "./pages/CheckoutConfirmation";
+import OrderTracking from "./pages/OrderTracking";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <CartProvider>
     <OrdersProvider>
     <WishlistProvider>
+    <CheckoutProvider>
+    <AccountProvider>
     <BrowserRouter>
+      <ScrollToTop />
+      <DocumentTitle />
+      <CartToast />
       <Routes>
 
         {/* ================================
@@ -58,6 +83,11 @@ function App() {
         />
 
         <Route
+          path="/orders/:id/track"
+          element={<OrderTracking />}
+        />
+
+        <Route
           path="/orders/:id"
           element={<OrderDetail />}
         />
@@ -80,6 +110,26 @@ function App() {
         <Route
           path="/cart"
           element={<Cart />}
+        />
+
+        <Route
+          path="/checkout"
+          element={<CheckoutDelivery />}
+        />
+
+        <Route
+          path="/checkout/payment"
+          element={<CheckoutPayment />}
+        />
+
+        <Route
+          path="/checkout/review"
+          element={<CheckoutReview />}
+        />
+
+        <Route
+          path="/checkout/confirmation"
+          element={<CheckoutConfirmation />}
         />
 
 
@@ -129,7 +179,71 @@ function App() {
 
         <Route
           path="/account"
-          element={<Account />}
+          element={
+            <ProtectedRoute>
+              <Account />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/profile"
+          element={
+            <ProtectedRoute>
+              <AccountProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/orders"
+          element={
+            <ProtectedRoute>
+              <AccountOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/orders/:orderId"
+          element={
+            <ProtectedRoute>
+              <AccountOrderDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/wishlist"
+          element={
+            <ProtectedRoute>
+              <AccountWishlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/addresses"
+          element={
+            <ProtectedRoute>
+              <AccountAddresses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/reviews"
+          element={
+            <ProtectedRoute>
+              <AccountReviews />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/rewards"
+          element={
+            <ProtectedRoute>
+              <AccountRewards />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={<Login />}
         />
 
         <Route
@@ -149,6 +263,8 @@ function App() {
 
       </Routes>
     </BrowserRouter>
+    </AccountProvider>
+    </CheckoutProvider>
     </WishlistProvider>
     </OrdersProvider>
     </CartProvider>

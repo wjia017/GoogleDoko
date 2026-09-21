@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Leaf } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { useSearchParams, Link } from "react-router-dom";
 
 import TopBar from "../components/TopBar";
 import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
 import Footer from "../components/Footer";
+import Pagination, { paginateItems } from "../components/Pagination";
 
 import { products } from "../data/products";
+import categoriesBanner from "../assets/images/categories/categories-banner.jpg";
+import categoryPromo from "../assets/images/categories/category-promo.jpg";
 
 type Category =
     | "All"
@@ -38,6 +41,7 @@ function CategoriesPage() {
                 ? (categoryFromUrl as Category)
                 : "All",
         );
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         if (
@@ -47,6 +51,10 @@ function CategoriesPage() {
             setSelectedCategory(categoryFromUrl as Category);
         }
     }, [categoryFromUrl]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [placeFromUrl, selectedCategory]);
 
     const filteredProducts = useMemo(() => {
         const byPlace = placeFromUrl
@@ -62,6 +70,20 @@ function CategoriesPage() {
         );
     }, [placeFromUrl, selectedCategory]);
 
+    const paged = paginateItems(filteredProducts, page);
+
+    function changePage(nextPage: number) {
+        setPage(nextPage);
+        document
+            .querySelector(".all-products-section")
+            ?.scrollIntoView({ behavior: "auto", block: "start" });
+    }
+
+    function chooseCategory(category: Category) {
+        setSelectedCategory(category);
+        setPage(1);
+    }
+
     return (
         <>
             <TopBar />
@@ -70,35 +92,30 @@ function CategoriesPage() {
             <main className="categories-page">
 
                 {/* Page Banner */}
+                {!placeFromUrl && (
                 <section className="categories-banner">
                     <div className="categories-banner-content">
-
-                        <div className="categories-banner-text">
-                            <span className="banner-label">
-                                OUR CATEGORIES
-                            </span>
-
-                            <h1>
-                                Fresh Choices
-                                <br />
-                                for a Healthier You
-                            </h1>
-
+                        <img
+                            src={categoriesBanner}
+                            alt=""
+                            className="categories-banner-photo"
+                        />
+                        <div className="offer-sr-only">
+                            <p>Our fresh produce</p>
+                            <h1>Fresh Choices for a Healthier You</h1>
                             <p>
-                                Browse through our wide range of fresh,
-                                organic and high-quality products.
+                                Browse through our wide range of fresh, organic
+                                and high-quality products.
+                            </p>
+                            <p>
+                                100% Natural. Freshly Harvested. Safe and
+                                Hygienic. Better Health For You. Good Food
+                                Good Mood.
                             </p>
                         </div>
-
-                        <div className="categories-banner-image">
-                            <img
-                                src="/src/assets/images/categories/categories-banner.jpg?v=2"
-                                alt="Fresh vegetables in a basket"
-                            />
-                        </div>
-
                     </div>
                 </section>
+                )}
 
 
                 {/* Category Filter */}
@@ -114,7 +131,7 @@ function CategoriesPage() {
                                         ? "category-filter-button active"
                                         : "category-filter-button"
                                 }
-                                onClick={() => setSelectedCategory(category)}
+                                onClick={() => chooseCategory(category)}
                             >
                                 {category}
                             </button>
@@ -145,9 +162,10 @@ function CategoriesPage() {
 
 
                     {filteredProducts.length > 0 ? (
+                        <>
                         <div className="categories-products-grid">
 
-                            {filteredProducts.map((product) => (
+                            {paged.items.map((product) => (
                                 <ProductCard
                                     key={product.id}
                                     product={product}
@@ -155,6 +173,13 @@ function CategoriesPage() {
                             ))}
 
                         </div>
+
+                        <Pagination
+                            page={paged.current}
+                            totalPages={paged.totalPages}
+                            onChange={changePage}
+                        />
+                        </>
                     ) : (
                         <div className="no-products-message">
                             <Leaf size={40} />
@@ -170,7 +195,7 @@ function CategoriesPage() {
 
                             <button
                                 type="button"
-                                onClick={() => setSelectedCategory("All")}
+                                onClick={() => chooseCategory("All")}
                             >
                                 View all products
                             </button>
@@ -181,40 +206,22 @@ function CategoriesPage() {
 
 
                 {/* Promotional Section */}
-                <section className="category-promo-section">
-
-                    <div className="category-promo-content">
-
-                        <div className="category-promo-text">
-
-                            <h2>
-                                Fresh Products
-                                <br />
-                                Better Living
-                            </h2>
-
-                            <p>
-                                Organic. Healthy. Natural.
-                                <br />
-                                Everything you need for a healthier lifestyle.
-                            </p>
-
-                            <Link to="/shop" className="category-promo-button">
-                                Buy Now
-                                <ArrowRight size={17} />
-                            </Link>
-
+                <section className="categories-bottom-promo">
+                    <div className="categories-bottom-promo-frame">
+                        <img
+                            src={categoryPromo}
+                            alt=""
+                            className="categories-bottom-promo-photo"
+                        />
+                        <div className="offer-sr-only">
+                            <h2>Fresh Products Better Living</h2>
+                            <p>Organic. Healthy. Natural.</p>
+                            <p>Everything you need for a healthier lifestyle.</p>
                         </div>
-
-                        <div className="category-promo-image">
-                            <img
-                                src="/src/assets/images/categories/category-promo.jpg?v=2"
-                                alt="Fresh vegetables and fruits"
-                            />
-                        </div>
-
+                        <Link to="/shop" className="categories-bottom-promo-hotspot">
+                            Buy Now
+                        </Link>
                     </div>
-
                 </section>
 
             </main>

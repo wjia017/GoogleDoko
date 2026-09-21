@@ -15,7 +15,6 @@ const offers = [
     theme: "green" as const,
     to: "/places",
   },
-
   {
     id: 2,
     title: "Popular Near You",
@@ -23,10 +22,8 @@ const offers = [
     buttonText: "Explore Now",
     image: popularNearYouImage,
     theme: "yellow" as const,
-    badge: "Trending Now",
     to: "/shop",
   },
-
   {
     id: 3,
     title: "Seasonal Products",
@@ -34,7 +31,6 @@ const offers = [
     buttonText: "Discover Now",
     image: seasonalImage,
     theme: "blue" as const,
-    badge: "Best",
     to: "/shop",
   },
 ];
@@ -42,20 +38,14 @@ const offers = [
 function SpecialOffers() {
   return (
     <section className="offers-section">
-
       <div className="section-header">
-
         <h2>Special Offers</h2>
-
         <Link to="/shop" className="section-view-all">
           View all
         </Link>
-
       </div>
 
-
       <div className="offers-grid">
-
         {offers.map((offer) => (
           <OfferCard
             key={offer.id}
@@ -64,13 +54,10 @@ function SpecialOffers() {
             buttonText={offer.buttonText}
             image={offer.image}
             theme={offer.theme}
-            badge={offer.badge}
             to={offer.to}
           />
         ))}
-
       </div>
-
     </section>
   );
 }

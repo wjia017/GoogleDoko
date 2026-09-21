@@ -1,20 +1,41 @@
 import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { ArrowRight, Leaf, MapPin, Search as SearchIcon } from "lucide-react";
 
 import TopBar from "../components/TopBar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ProductCard from "../components/ProductCard";
+import Pagination, {
+  paginateItems,
+  PLACES_PAGE_SIZE,
+} from "../components/Pagination";
 
 import { searchPlaces, searchProducts } from "../data/search";
 
 function Search() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
+  const [page, setPage] = useState(1);
+  const [placesPage, setPlacesPage] = useState(1);
 
   const matchedProducts = searchProducts(query);
   const matchedPlaces = searchPlaces(query);
   const total = matchedProducts.length + matchedPlaces.length;
+  const paged = paginateItems(matchedProducts, page);
+  const pagedPlaces = paginateItems(matchedPlaces, placesPage, PLACES_PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(1);
+    setPlacesPage(1);
+  }, [query]);
+
+  function changePage(nextPage: number) {
+    setPage(nextPage);
+    document
+      .querySelector(".all-products-section")
+      ?.scrollIntoView({ behavior: "auto", block: "start" });
+  }
 
   return (
     <>
@@ -46,7 +67,7 @@ function Search() {
             </div>
 
             <div className="places-grid search-places-grid">
-              {matchedPlaces.map((place) => (
+              {pagedPlaces.items.map((place) => (
                 <Link
                   key={place.origin}
                   to={`/categories?place=${encodeURIComponent(place.origin)}`}
@@ -74,6 +95,12 @@ function Search() {
                 </Link>
               ))}
             </div>
+
+            <Pagination
+              page={pagedPlaces.current}
+              totalPages={pagedPlaces.totalPages}
+              onChange={setPlacesPage}
+            />
           </section>
         )}
 
@@ -86,10 +113,16 @@ function Search() {
               </div>
 
               <div className="categories-products-grid">
-                {matchedProducts.map((product) => (
+                {paged.items.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
+
+              <Pagination
+                page={paged.current}
+                totalPages={paged.totalPages}
+                onChange={changePage}
+              />
             </>
           ) : query && matchedPlaces.length === 0 ? (
             <div className="no-products-message">

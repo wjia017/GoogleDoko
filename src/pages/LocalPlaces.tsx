@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { ArrowRight, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import TopBar from "../components/TopBar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Pagination, {
+  paginateItems,
+  PLACES_PAGE_SIZE,
+} from "../components/Pagination";
 
 import { products } from "../data/products";
 
@@ -22,6 +27,7 @@ function soldCount(sold: string) {
 }
 
 function LocalPlaces() {
+  const [page, setPage] = useState(1);
   const places = products.reduce<
     {
       origin: string;
@@ -47,6 +53,15 @@ function LocalPlaces() {
     return list;
   }, []);
 
+  const paged = paginateItems(places, page, PLACES_PAGE_SIZE);
+
+  function changePage(nextPage: number) {
+    setPage(nextPage);
+    document
+      .querySelector(".places-list-section")
+      ?.scrollIntoView({ behavior: "auto", block: "start" });
+  }
+
   return (
     <>
       <TopBar />
@@ -66,7 +81,7 @@ function LocalPlaces() {
 
         <section className="places-list-section">
           <div className="places-grid">
-            {places.map((place) => (
+            {paged.items.map((place) => (
               <Link
                 key={place.origin}
                 to={`/categories?place=${encodeURIComponent(place.origin)}`}
@@ -94,6 +109,12 @@ function LocalPlaces() {
               </Link>
             ))}
           </div>
+
+          <Pagination
+            page={paged.current}
+            totalPages={paged.totalPages}
+            onChange={changePage}
+          />
         </section>
       </main>
 

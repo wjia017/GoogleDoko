@@ -14,6 +14,7 @@ import {
   Mail,
   Navigation,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import LogoMark from "./LogoMark";
 
 function Footer() {
@@ -75,23 +76,31 @@ function Footer() {
 
             <ul className="footer-links">
               <li>
-                <UserRound size={21} />
-                <span>About Us</span>
+                <Link to="/about">
+                  <UserRound size={21} />
+                  <span>About Us</span>
+                </Link>
               </li>
 
               <li>
-                <Phone size={21} />
-                <span>Contact us</span>
+                <Link to="/support">
+                  <Phone size={21} />
+                  <span>Contact us</span>
+                </Link>
               </li>
 
               <li>
-                <CircleHelp size={21} />
-                <span>News</span>
+                <Link to="/about">
+                  <CircleHelp size={21} />
+                  <span>News</span>
+                </Link>
               </li>
 
               <li>
-                <MapPin size={21} />
-                <span>Store location</span>
+                <Link to="/places">
+                  <MapPin size={21} />
+                  <span>Store location</span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -105,28 +114,38 @@ function Footer() {
 
             <ul className="footer-links">
               <li>
-                <ShieldCheck size={21} />
-                <span>Payment policy</span>
+                <Link to="/about">
+                  <ShieldCheck size={21} />
+                  <span>Payment policy</span>
+                </Link>
               </li>
 
               <li>
-                <Lock size={21} />
-                <span>Privacy policy</span>
+                <Link to="/about">
+                  <Lock size={21} />
+                  <span>Privacy policy</span>
+                </Link>
               </li>
 
               <li>
-                <Undo2 size={21} />
-                <span>Return policy</span>
+                <Link to="/about">
+                  <Undo2 size={21} />
+                  <span>Return policy</span>
+                </Link>
               </li>
 
               <li>
-                <Package size={21} />
-                <span>Shipping policy</span>
+                <Link to="/delivery">
+                  <Package size={21} />
+                  <span>Shipping policy</span>
+                </Link>
               </li>
 
               <li>
-                <FileText size={21} />
-                <span>Terms &amp; condition</span>
+                <Link to="/about">
+                  <FileText size={21} />
+                  <span>Terms &amp; condition</span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -140,28 +159,38 @@ function Footer() {
 
             <ul className="footer-links">
               <li>
-                <UserRound size={21} />
-                <span>My account</span>
+                <Link to="/account">
+                  <UserRound size={21} />
+                  <span>My account</span>
+                </Link>
               </li>
 
               <li>
-                <ShoppingCart size={21} />
-                <span>My cart</span>
+                <Link to="/cart">
+                  <ShoppingCart size={21} />
+                  <span>My cart</span>
+                </Link>
               </li>
 
               <li>
-                <ClipboardList size={21} />
-                <span>Order history</span>
+                <Link to="/account/orders">
+                  <ClipboardList size={21} />
+                  <span>Order history</span>
+                </Link>
               </li>
 
               <li>
-                <Heart size={21} />
-                <span>My wishlist</span>
+                <Link to="/account/wishlist">
+                  <Heart size={21} />
+                  <span>My wishlist</span>
+                </Link>
               </li>
 
               <li>
-                <Navigation size={21} />
-                <span>My address</span>
+                <Link to="/account/addresses">
+                  <Navigation size={21} />
+                  <span>My address</span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -203,9 +232,9 @@ function Footer() {
           <p>© 2026&nbsp; GoogleDoko, All Rights Reserved.</p>
 
           <div className="footer-bottom-links">
-            <a href="#">Terms and conditions</a>
+            <Link to="/about">Terms and conditions</Link>
 
-            <a href="#">Privacy Limited</a>
+            <Link to="/about">Privacy Limited</Link>
           </div>
         </div>
       </div>

@@ -1,41 +1,62 @@
 import { useRef, useState, type FormEvent } from "react";
+import { Camera, UserRound } from "lucide-react";
 
 import AccountShell from "../../components/account/AccountShell";
 import { useAccount } from "../../context/AccountContext";
 
-async function fileToDataUrl(file: File) {
+function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function fileToDataUrl(file: File) {
+  const original = await readFileAsDataUrl(file);
+
+  return new Promise<string>((resolve) => {
     const image = new Image();
-    const url = URL.createObjectURL(file);
     image.onload = () => {
       const canvas = document.createElement("canvas");
       const max = 480;
       const scale = Math.min(1, max / Math.max(image.width, image.height));
-      canvas.width = Math.max(1, image.width * scale);
-      canvas.height = Math.max(1, image.height * scale);
-      canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height);
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      const context = canvas.getContext("2d");
+      if (!context) {
+        resolve(original);
+        return;
+      }
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
       resolve(canvas.toDataURL("image/jpeg", 0.72));
-      URL.revokeObjectURL(url);
     };
-    image.onerror = reject;
-    image.src = url;
+    image.onerror = () => resolve(original);
+    image.src = original;
   });
 }
 
 function AccountProfile() {
   const { user, updateUser, setPhoto, showToast } = useAccount();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(user);
-
-  function startEdit() {
-    setDraft(user);
-    setEditing(true);
-  }
+  const [draft, setDraft] = useState({
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    phone: user.phone,
+    location: user.location,
+  });
 
   function cancel() {
-    setDraft(user);
-    setEditing(false);
+    setDraft({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      location: user.location,
+    });
+    showToast("Changes discarded");
   }
 
   function save(event: FormEvent) {
@@ -47,26 +68,35 @@ function AccountProfile() {
       phone: draft.phone.trim() || user.phone,
       location: draft.location.trim() || user.location,
     });
-    setEditing(false);
     showToast("Profile updated successfully");
   }
 
-  async function onPhoto(file?: File) {
+  async function onPhoto(file?: File | null) {
     if (!file) {
       return;
     }
-    const dataUrl = await fileToDataUrl(file);
-    setPhoto(dataUrl);
-    showToast("Profile photo updated");
-  }
 
-  const source = editing ? draft : user;
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      setPhoto(dataUrl);
+      showToast("Profile photo updated");
+    } catch {
+      showToast("Could not upload that photo");
+    }
+
+    if (fileRef.current) {
+      fileRef.current.value = "";
+    }
+  }
 
   return (
     <AccountShell title="Personal Information">
       <div className="account-profile-photo">
-        <div
-          className="profile-avatar"
+        <button
+          type="button"
+          className="profile-avatar account-avatar-button"
+          onClick={() => fileRef.current?.click()}
+          aria-label="Upload profile photo"
           style={
             user.photo
               ? {
@@ -76,13 +106,18 @@ function AccountProfile() {
                 }
               : undefined
           }
-        />
-        <div>
+        >
+          {user.photo ? null : <UserRound size={48} strokeWidth={1.6} />}
+          <span className="account-avatar-camera">
+            <Camera size={16} />
+          </span>
+        </button>
+        <div className="account-form-actions">
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
-            hidden
+            className="account-file-input"
             onChange={(event) => onPhoto(event.target.files?.[0])}
           />
           <button
@@ -112,8 +147,7 @@ function AccountProfile() {
           <label>
             First Name
             <input
-              value={source.firstName}
-              disabled={!editing}
+              value={draft.firstName}
               onChange={(event) =>
                 setDraft((current) => ({ ...current, firstName: event.target.value }))
               }
@@ -122,8 +156,7 @@ function AccountProfile() {
           <label>
             Last Name
             <input
-              value={source.lastName}
-              disabled={!editing}
+              value={draft.lastName}
               onChange={(event) =>
                 setDraft((current) => ({ ...current, lastName: event.target.value }))
               }
@@ -133,8 +166,7 @@ function AccountProfile() {
             Email
             <input
               type="email"
-              value={source.email}
-              disabled={!editing}
+              value={draft.email}
               onChange={(event) =>
                 setDraft((current) => ({ ...current, email: event.target.value }))
               }
@@ -143,8 +175,7 @@ function AccountProfile() {
           <label>
             Phone
             <input
-              value={source.phone}
-              disabled={!editing}
+              value={draft.phone}
               onChange={(event) =>
                 setDraft((current) => ({ ...current, phone: event.target.value }))
               }
@@ -153,8 +184,7 @@ function AccountProfile() {
           <label className="account-form-wide">
             Location
             <input
-              value={source.location}
-              disabled={!editing}
+              value={draft.location}
               onChange={(event) =>
                 setDraft((current) => ({ ...current, location: event.target.value }))
               }
@@ -163,20 +193,12 @@ function AccountProfile() {
         </div>
 
         <div className="account-form-actions">
-          {editing ? (
-            <>
-              <button type="submit" className="account-btn">
-                Save Changes
-              </button>
-              <button type="button" className="account-btn ghost" onClick={cancel}>
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button type="button" className="account-btn" onClick={startEdit}>
-              Edit
-            </button>
-          )}
+          <button type="submit" className="account-btn">
+            Save Changes
+          </button>
+          <button type="button" className="account-btn ghost" onClick={cancel}>
+            Cancel
+          </button>
         </div>
       </form>
     </AccountShell>

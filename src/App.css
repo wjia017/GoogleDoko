@@ -2650,19 +2650,20 @@ x
    REVIEW GRID
 ======================================== */
 
-.customer-reviews-grid {
-  display: grid;
-
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 38px;
+.customer-reviews-viewport {
+  overflow: hidden;
+  width: 100%;
 }
 
-/* ========================================
-   REVIEW CARD
-======================================== */
+.customer-reviews-track {
+  display: flex;
+  gap: var(--review-gap, 38px);
+  transition: transform 0.5s ease;
+}
 
 .customer-review-card {
+  flex: 0 0 calc((100% - (var(--review-visible, 3) - 1) * var(--review-gap, 38px)) / var(--review-visible, 3));
+  min-width: 0;
   min-height: 250px;
 
   padding: 38px 38px 28px;
@@ -2768,9 +2769,27 @@ x
   align-items: center;
   justify-content: center;
 
-  gap: 35px;
+  gap: 18px;
 
   margin-top: 34px;
+}
+
+.review-arrow {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #f5f4eb;
+  color: #171717;
+  cursor: pointer;
+}
+
+.review-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .review-dot {
@@ -2797,20 +2816,8 @@ x
 ======================================== */
 
 @media (max-width: 900px) {
-  .customer-reviews-grid {
-    grid-template-columns: 1fr 1fr;
-
-    gap: 25px;
-  }
-
-  .customer-review-card:last-child {
-    grid-column: 1 / -1;
-
-    max-width: 500px;
-
-    width: 100%;
-
-    margin: 0 auto;
+  .customer-review-card {
+    min-height: 240px;
   }
 }
 
@@ -2827,16 +2834,6 @@ x
     margin-bottom: 35px;
 
     font-size: 27px;
-  }
-
-  .customer-reviews-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .customer-review-card:last-child {
-    grid-column: auto;
-
-    max-width: none;
   }
 
   .customer-review-card {
@@ -8464,6 +8461,35 @@ x
   align-items: center;
   gap: 18px;
   margin-bottom: 24px;
+}
+
+.account-avatar-button {
+  position: relative;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.account-avatar-camera {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #168d51;
+  color: #ffffff;
+}
+
+.account-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
 }
 
 .account-filter-row {

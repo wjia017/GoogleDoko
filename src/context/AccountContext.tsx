@@ -113,7 +113,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [isLoggedIn]);
 
   useEffect(() => {
-    localStorage.setItem("googledoko-user", JSON.stringify(user));
+    try {
+      localStorage.setItem("googledoko-user", JSON.stringify(user));
+    } catch {
+      // Photo data URLs can exceed quota; keep the in-memory profile anyway.
+    }
   }, [user]);
 
   useEffect(() => {

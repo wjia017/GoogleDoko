@@ -7,7 +7,7 @@ import {
   MapPin,
 } from "lucide-react";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { searchPlaces, searchProducts } from "../data/search";

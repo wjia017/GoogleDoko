@@ -119,6 +119,9 @@ function OrderDetail() {
   const currentStep = statusIndex(order.status);
   const dates = trackerDates(order);
   const paid = order.status === "Delivered";
+  const orderId = order.id;
+  const orderDate = order.date;
+  const orderStatus = order.status;
 
   function reorder() {
     items.forEach((item) => {
@@ -135,9 +138,9 @@ function OrderDetail() {
   function downloadInvoice() {
     const lines = [
       "GoogleDoko Invoice",
-      `Order #${order.id}`,
-      `Placed on ${order.date}`,
-      `Status: ${order.status}`,
+      `Order #${orderId}`,
+      `Placed on ${orderDate}`,
+      `Status: ${orderStatus}`,
       "",
       "Items:",
       ...items.map(
@@ -160,7 +163,7 @@ function OrderDetail() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `GoogleDoko-Invoice-${order.id}.txt`;
+    link.download = `GoogleDoko-Invoice-${orderId}.txt`;
     link.click();
     URL.revokeObjectURL(url);
   }

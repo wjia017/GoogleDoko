@@ -8,10 +8,11 @@ function Hero() {
 
         {/* Left Content */}
         <div className="hero-text">
+          <p className="hero-kicker">From local places across Nepal</p>
 
           <h1>
-            Discover authentic products
-            <br />
+            Discover authentic products{" "}
+            <br className="hero-desktop-br" />
             from their original places.
           </h1>
 
@@ -28,7 +29,7 @@ function Hero() {
             </Link>
 
             <Link to="/places" className="secondary-button">
-              <MapPin size={22} />
+              <MapPin size={20} className="hero-btn-icon" />
               Explore Local Places
             </Link>
 
@@ -76,7 +77,7 @@ function Hero() {
         {/* Right Image */}
         <div className="hero-image">
           <img
-            src="/src/assets/images/hero-vegetables.png"
+            src="/src/frontend/assets/images/hero-vegetables.png"
             alt="Fresh vegetables in a basket"
           />
         </div>

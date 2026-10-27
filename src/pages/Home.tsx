@@ -1,5 +1,5 @@
 import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/layout/Navbar";
 import Hero from "../components/Hero";
 import Benefits from "../components/Benefits";
 import SpecialOffers from "../components/SpecialOffers";
@@ -10,7 +10,7 @@ import OrganicPromo from "../components/OrganicPromo";
 import WhyChooseUs from "../components/WhyChooseUs";
 import CustomerReviews from "../components/CustomerReviews";
 import Newsletter from "../components/NewsLetter";
-import Footer from "../components/Footer";
+import Footer from "../components/layout/Footer";
 
 //react router
 

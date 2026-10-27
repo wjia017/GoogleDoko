@@ -9,6 +9,7 @@ import {
   Coins,
   Gift,
   Heart,
+  Info,
   Lock,
   LogOut,
   MapPin,
@@ -21,8 +22,8 @@ import {
 } from "lucide-react";
 
 import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import AccountSettingsModals from "../components/AccountSettingsModals";
 
 import { useAccount } from "../context/AccountContext";
@@ -197,6 +198,17 @@ function Account() {
                     <ChevronRight size={18} />
                   </Link>
 
+                  <Link to="/about" className="profile-menu-row">
+                    <span className="profile-menu-icon mint">
+                      <Info size={18} />
+                    </span>
+                    <span>
+                      <strong>About Us</strong>
+                      <small>Learn about GoogleDoko</small>
+                    </span>
+                    <ChevronRight size={18} />
+                  </Link>
+
                   <Link to="/account/reviews" className="profile-menu-row">
                     <span className="profile-menu-icon mint">
                       <Star size={18} />
@@ -213,7 +225,7 @@ function Account() {
                     className="profile-menu-row"
                     onClick={() => {
                       logout();
-                      navigate("/login");
+                      navigate("/");
                     }}
                   >
                     <span className="profile-menu-icon mint">

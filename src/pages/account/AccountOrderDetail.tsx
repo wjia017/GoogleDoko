@@ -21,7 +21,6 @@ function AccountOrderDetail() {
       buyAgain();
       navigate(`/account/orders/${order.id}`, { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
   if (!order) {

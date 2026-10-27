@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import TopBar from "../TopBar";
-import Navbar from "../Navbar";
-import Footer from "../Footer";
+import Navbar from "../layout/Navbar";
+import Footer from "../layout/Footer";
 
 interface AccountShellProps {
   title: string;

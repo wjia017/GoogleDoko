@@ -6,12 +6,15 @@ import {
 } from "lucide-react";
 
 import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import OrderCard from "../components/OrderCard";
 import SupportModal from "../components/SupportModal";
 
 import { useOrders } from "../context/OrdersContext";
+import { useCart } from "../context/CartContext";
+import { useAccount } from "../context/AccountContext";
+import { normalizeOrder } from "../utils/normalizeOrder";
 
 const tabs = [
     "All Orders",
@@ -22,15 +25,28 @@ const tabs = [
 ];
 
 function Orders() {
-    const { orders } = useOrders();
+    const { orders: contextOrders } = useOrders();
+    const { orders: accountOrders, points, isLoggedIn } = useAccount();
+    const { cartItems } = useCart();
     const [activeTab, setActiveTab] = useState("All Orders");
     const [supportOpen, setSupportOpen] = useState(false);
+
+    const mergedOrdersMap = new Map();
+    for (const o of [...accountOrders, ...contextOrders]) {
+        if (o && o.id && !mergedOrdersMap.has(o.id)) {
+            const norm = normalizeOrder(o);
+            if (norm) mergedOrdersMap.set(norm.id, norm);
+        }
+    }
+    const orders = Array.from(mergedOrdersMap.values());
+
+    const cartTotalCount = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
     const filteredOrders =
         activeTab === "All Orders"
             ? orders
             : orders.filter(
-                (order) => order.status === activeTab
+                (order) => order.status.toLowerCase() === activeTab.toLowerCase() || (activeTab === "Processing" && order.status.toLowerCase() === "pending")
             );
 
     return (
@@ -105,22 +121,22 @@ function Orders() {
 
                             <div className="summary-row">
                                 <span>Total Orders</span>
-                                <strong>24</strong>
+                                <strong>{orders.length}</strong>
                             </div>
 
                             <div className="summary-row">
                                 <span>Average Rating</span>
-                                <strong>4.8</strong>
+                                <strong>4.9</strong>
                             </div>
 
                             <div className="summary-row">
                                 <span>Added to Cart</span>
-                                <strong>12</strong>
+                                <strong>{cartTotalCount}</strong>
                             </div>
 
                             <div className="summary-row">
-                                <span>Wallet Balance</span>
-                                <strong>Rs . 320</strong>
+                                <span>Wallet Points</span>
+                                <strong>{points || (isLoggedIn ? 200 : 0)} pts</strong>
                             </div>
 
                         </div>

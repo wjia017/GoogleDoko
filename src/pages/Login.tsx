@@ -1,81 +1,243 @@
-import { useMemo, useState, type FormEvent } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, Navigate, useLocation } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
-import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import { useAccount } from "../context/AccountContext";
+import AuthShell from "../components/auth/AuthShell";
+import AuthPasswordField from "../components/auth/AuthPasswordField";
+import { postLoginPath, useAccount } from "../context/AccountContext";
+import { DEMO_PASSWORD, DEMO_VENDOR_EMAIL, type AccountRole } from "../data/authOptions";
+import loginProduceImage from "../assets/images/login-produce.jpg";
+
+const loginSchema = yup.object({
+  identifier: yup
+    .string()
+    .required("Email or phone number is required")
+    .test("valid-ident", "Enter a valid email address or 10-digit mobile number", (val) => {
+      if (!val) return false;
+      const s = val.trim();
+      if (s.includes("@")) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+      }
+      const digits = s.replace(/\D/g, "");
+      return digits.length === 10;
+    })
+    .trim(),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters"),
+  remember: yup.boolean().default(true),
+});
+
+type LoginFormData = yup.InferType<typeof loginSchema>;
 
 function Login() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { login, isLoggedIn } = useAccount();
-  const [email, setEmail] = useState("lahana.lawaju@gmail.com");
-  const [password, setPassword] = useState("password123");
-  const [error, setError] = useState("");
+  const { login, isLoggedIn, user } = useAccount();
+  const signupState =
+    (location.state as {
+      from?: string;
+      email?: string;
+      role?: AccountRole;
+      signup?: boolean;
+    } | null) ?? {};
+  const from = signupState.from;
+  const searchParams = new URLSearchParams(location.search);
+  const paramRole = searchParams.get("role") as AccountRole | null;
+  const initialRole: AccountRole =
+    signupState.role ??
+    (paramRole === "vendor" || paramRole === "customer"
+      ? paramRole
+      : from?.startsWith("/vendor")
+      ? "vendor"
+      : "customer");
+  const [role, setRole] = useState<AccountRole>(initialRole);
+  const [serverError, setServerError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const signupNotice = signupState.signup
+    ? "Account created. Please log in to continue."
+    : "";
 
-  const hint = useMemo(
-    () => "Demo login: lahana.lawaju@gmail.com / password123",
-    [],
-  );
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: yupResolver(loginSchema),
+    defaultValues: {
+      identifier: signupState.email ?? "",
+      password: "",
+      remember: true,
+    },
+  });
 
-  const from =
-    (location.state as { from?: string } | null)?.from || "/account";
+  const identifier = watch("identifier");
+  const password = watch("password");
+  const remember = watch("remember");
 
   if (isLoggedIn) {
-    return <Navigate to={from} replace />;
+    return <Navigate to={postLoginPath(user.role, from)} replace />;
   }
 
-  function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      setError("Email and password are required");
-      return;
+  async function onSubmit(data: LoginFormData) {
+    setLoading(true);
+    setServerError("");
+    const result = await login(data.identifier, data.password, Boolean(data.remember), role);
+    setLoading(false);
+    if (result) {
+      setServerError(result);
     }
-    login();
-    navigate(from, { replace: true });
   }
 
   return (
-    <>
-      <TopBar />
-      <Navbar />
-      <main className="profile-page">
-        <div className="profile-page-inner account-login">
-          <h1>Log in</h1>
-          <section className="profile-shell">
-            <p className="account-login-hint">{hint}</p>
-            <form className="account-form" onSubmit={submit}>
-              <label>
-                Email
+    <AuthShell wide>
+      <div className="auth-login-split">
+        <aside className="auth-login-visual">
+          <img
+            src={loginProduceImage}
+            alt="Fresh Produce Directly from Local Farmers"
+          />
+        </aside>
+
+        <div className="auth-card auth-login-form">
+          <h1>Welcome back to GoogleDoko</h1>
+          <p className="auth-lead">
+            {role === "vendor"
+              ? "Log in to manage your vendor store, fresh produce, and orders."
+              : "Log in to continue shopping with GoogleDoko."}
+          </p>
+          {signupNotice ? <p className="auth-signup-notice">{signupNotice}</p> : null}
+
+          <div className="auth-role-toggle" role="tablist">
+            <button
+              type="button"
+              className={role === "customer" ? "active" : ""}
+              onClick={() => {
+                setRole("customer");
+                setServerError("");
+              }}
+            >
+              Customer
+            </button>
+            <button
+              type="button"
+              className={role === "vendor" ? "active" : ""}
+              onClick={() => {
+                setRole("vendor");
+                setServerError("");
+              }}
+            >
+              Vendor
+            </button>
+          </div>
+
+          <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <label className={`auth-field${errors.identifier ? " invalid" : ""}`}>
+              <span>Email / Phone Number</span>
+              <input
+                {...register("identifier")}
+                value={identifier}
+                style={{ borderColor: errors.identifier ? "#ef4444" : undefined }}
+                onChange={(event) => {
+                  setValue("identifier", event.target.value, { shouldValidate: true });
+                  if (serverError) setServerError("");
+                }}
+                placeholder="Enter your email or phone number"
+                autoComplete="username"
+              />
+              {errors.identifier?.message && (
+                <span className="auth-field-error" style={{ color: "#ef4444", fontSize: 12, marginTop: 4, display: "block" }}>
+                  {errors.identifier.message}
+                </span>
+              )}
+            </label>
+
+            <AuthPasswordField
+              label="Password"
+              value={password || ""}
+              onChange={(val) => {
+                setValue("password", val, { shouldValidate: true });
+                if (serverError) setServerError("");
+              }}
+              placeholder="Enter your password"
+              autoComplete="current-password"
+              required={false}
+              error={errors.password?.message}
+            />
+
+            <div className="auth-login-row">
+              <label className="auth-check compact">
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  type="checkbox"
+                  checked={Boolean(remember)}
+                  onChange={(event) => setValue("remember", event.target.checked)}
                 />
+                <span>Remember me</span>
               </label>
-              <label>
-                Password
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-              </label>
-              {error ? <p className="account-form-error">{error}</p> : null}
-              <button type="submit" className="account-btn">
-                Continue
-              </button>
-            </form>
-            <p className="account-login-note">
-              This is a frontend-only demo. No server password is checked.
-            </p>
-            <Link to="/">Back to Home</Link>
-          </section>
+              <Link to="/forgot-password" className="auth-forgot">
+                Forgot Password?
+              </Link>
+            </div>
+
+            {serverError ? <p className="auth-error">{serverError}</p> : null}
+
+            <button type="submit" className="auth-btn" disabled={loading}>
+              {loading ? "Logging in..." : role === "vendor" ? "Sign In as Vendor" : "Login"}
+            </button>
+
+            {role === "vendor" && (
+              <div
+                style={{
+                  marginTop: 14,
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  background: "#f0fdf4",
+                  border: "1px dashed #86efac",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  fontSize: 12,
+                  color: "#166534",
+                }}
+              >
+                <span>Demo Vendor: <strong>vendor@googledoko.com</strong></span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue("identifier", DEMO_VENDOR_EMAIL, { shouldValidate: true });
+                    setValue("password", DEMO_PASSWORD, { shouldValidate: true });
+                    if (serverError) setServerError("");
+                  }}
+                  style={{
+                    background: "#16a34a",
+                    border: "none",
+                    borderRadius: 6,
+                    padding: "4px 10px",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "#ffffff",
+                    cursor: "pointer",
+                  }}
+                >
+                  Autofill
+                </button>
+              </div>
+            )}
+          </form>
+
+          <p className="auth-switch">
+            Don&apos;t have an account?{" "}
+            <Link to={role === "vendor" ? "/signup/vendor" : "/signup"} state={{ from: from || (role === "vendor" ? "/vendor" : undefined) }}>
+              {role === "vendor" ? "Register as a Vendor" : "Sign Up"}
+            </Link>
+          </p>
         </div>
-      </main>
-      <Footer />
-    </>
+      </div>
+    </AuthShell>
   );
 }
 

@@ -23,7 +23,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "320+",
     origin: "Kullu, HP",
     seller: "Himalaya Farm",
-    image: "/src/assets/images/products/apple.jpg",
+    image: "/src/frontend/assets/images/products/apple.jpg",
   },
 
   {
@@ -36,7 +36,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "250+",
     origin: "Mustang, Nepal",
     seller: "Pure Natural",
-    image: "/src/assets/images/products/honey.jpg",
+    image: "/src/frontend/assets/images/products/honey.jpg",
   },
 
   {
@@ -49,7 +49,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "280+",
     origin: "Sunsari, Nepal",
     seller: "Fresh Valley",
-    image: "/src/assets/images/products/orange.jpg",
+    image: "/src/frontend/assets/images/products/orange.jpg",
   },
 
   {
@@ -62,7 +62,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "200+",
     origin: "Damak, Nepal",
     seller: "Green Harvest",
-    image: "/src/assets/images/products/avocado.jpg",
+    image: "/src/frontend/assets/images/products/avocado.jpg",
   },
 
   {
@@ -75,7 +75,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "410+",
     origin: "Chitwan, Nepal",
     seller: "Valley Fresh",
-    image: "/src/assets/images/products/banana.jpg",
+    image: "/src/frontend/assets/images/products/banana.jpg",
   },
 
   {
@@ -88,7 +88,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "390+",
     origin: "Kavre, Nepal",
     seller: "Hillside Farm",
-    image: "/src/assets/images/products/tomato.jpg",
+    image: "/src/frontend/assets/images/products/tomato.jpg",
   },
 
   {
@@ -101,7 +101,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "500+",
     origin: "Palpa, Nepal",
     seller: "Mountain Harvest",
-    image: "/src/assets/images/products/potato.jpg",
+    image: "/src/frontend/assets/images/products/potato.jpg",
   },
 
   {
@@ -114,7 +114,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "260+",
     origin: "Bhaktapur, Nepal",
     seller: "Green Leaf Farm",
-    image: "/src/assets/images/products/spinach.jpg",
+    image: "/src/frontend/assets/images/products/spinach.jpg",
   },
 
   {
@@ -127,7 +127,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "180+",
     origin: "Ilam, Nepal",
     seller: "Spice Garden",
-    image: "/src/assets/images/products/turmeric.jpg",
+    image: "/src/frontend/assets/images/products/turmeric.jpg",
   },
 
   {
@@ -140,7 +140,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "210+",
     origin: "Dang, Nepal",
     seller: "Aroma Spices",
-    image: "/src/assets/images/products/chili.jpg",
+    image: "/src/frontend/assets/images/products/chili.jpg",
   },
 
   {
@@ -153,7 +153,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "150+",
     origin: "Nepalgunj, Nepal",
     seller: "Spice Garden",
-    image: "/src/assets/images/products/cumin.jpg",
+    image: "/src/frontend/assets/images/products/cumin.jpg",
   },
 
   {
@@ -166,7 +166,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "420+",
     origin: "Chitwan, Nepal",
     seller: "Local Dairy",
-    image: "/src/assets/images/products/milk.jpg",
+    image: "/src/frontend/assets/images/products/milk.jpg",
   },
 
   {
@@ -179,7 +179,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "310+",
     origin: "Nuwakot, Nepal",
     seller: "Farm Fresh Dairy",
-    image: "/src/assets/images/products/eggs.jpg",
+    image: "/src/frontend/assets/images/products/eggs.jpg",
   },
 
   {
@@ -192,7 +192,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "190+",
     origin: "Kathmandu, Nepal",
     seller: "Local Dairy",
-    image: "/src/assets/images/products/yogurt.jpg",
+    image: "/src/frontend/assets/images/products/yogurt.jpg",
   },
 
   {
@@ -205,7 +205,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "270+",
     origin: "Jhapa, Nepal",
     seller: "Golden Grain",
-    image: "/src/assets/images/products/rice.jpg",
+    image: "/src/frontend/assets/images/products/rice.jpg",
   },
 
   {
@@ -218,7 +218,7 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "160+",
     origin: "Dang, Nepal",
     seller: "Harvest Mill",
-    image: "/src/assets/images/products/wheat.jpg",
+    image: "/src/frontend/assets/images/products/wheat.jpg",
   },
 
   {
@@ -231,20 +231,11 @@ const productList: Omit<Product, "gallery">[] = [
     sold: "230+",
     origin: "Siraha, Nepal",
     seller: "Golden Grain",
-    image: "/src/assets/images/products/lentils.jpg",
+    image: "/src/frontend/assets/images/products/lentils.jpg",
   },
 ];
 
-export const products: Product[] = productList.map((product) => {
-  const slug = product.image.split("/").pop()?.replace(".jpg", "") ?? product.id;
-
-  return {
-    ...product,
-    gallery: [
-      product.image,
-      `/src/assets/images/products/${slug}-2.jpg`,
-      `/src/assets/images/products/${slug}-3.jpg`,
-      `/src/assets/images/products/${slug}-4.jpg`,
-    ],
-  };
-});
+export const products: Product[] = productList.map((product) => ({
+  ...product,
+  gallery: [product.image],
+}));

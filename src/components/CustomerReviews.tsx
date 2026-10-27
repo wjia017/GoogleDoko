@@ -6,31 +6,31 @@ const reviews = [
     id: 1,
     text: "The vegetables are so fresh and organic. I can really taste the difference. Highly recommended!",
     name: "Sneha M.",
-    image: "/src/assets/images/customers/sneha.webp",
+    image: "/src/frontend/assets/images/customers/sneha.jpg",
   },
   {
     id: 2,
     text: "Great quality products and super fast delivery. I love how they support local farmers.",
     name: "Arjun K.",
-    image: "/src/assets/images/customers/arjun.jpeg",
+    image: "/src/frontend/assets/images/customers/arjun.jpg",
   },
   {
     id: 3,
     text: "This is my go-to store for all fresh produce. Everything is always top notch!",
     name: "Pooja R.",
-    image: "/src/assets/images/customers/pooja.avif",
+    image: "/src/frontend/assets/images/customers/pooja.jpg",
   },
   {
     id: 4,
     text: "The spices arrived well packed and the aroma is incredible. GoogleDoko has become my weekly grocery stop.",
     name: "Niraj S.",
-    image: "/src/assets/images/customers/arjun.jpeg",
+    image: "/src/frontend/assets/images/customers/niraj.jpg",
   },
   {
     id: 5,
     text: "Seasonal fruits were perfectly ripe and the delivery was on time. I will definitely order again!",
     name: "Anisha T.",
-    image: "/src/assets/images/customers/sneha.webp",
+    image: "/src/frontend/assets/images/customers/anisha.jpg",
   },
 ];
 
@@ -45,6 +45,61 @@ function visibleCount() {
     return 2;
   }
   return 3;
+}
+
+function CustomerAvatar({ name, image }: { name: string; image?: string }) {
+  const [error, setError] = useState(false);
+
+  const initials = name
+    .split(" ")
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const themes = [
+    { bg: "linear-gradient(135deg, #10b981, #047857)", color: "#ffffff" },
+    { bg: "linear-gradient(135deg, #f59e0b, #b45309)", color: "#ffffff" },
+    { bg: "linear-gradient(135deg, #8b5cf6, #6d28d9)", color: "#ffffff" },
+    { bg: "linear-gradient(135deg, #14b8a6, #0f766e)", color: "#ffffff" },
+    { bg: "linear-gradient(135deg, #f43f5e, #be123c)", color: "#ffffff" },
+  ];
+  const charCode = (name.charCodeAt(0) || 0) + (name.charCodeAt(1) || 0);
+  const theme = themes[charCode % themes.length];
+
+  if (image && !error) {
+    return (
+      <img
+        src={image}
+        alt={name}
+        className="customer-image"
+        onError={() => setError(true)}
+      />
+    );
+  }
+
+  return (
+    <div
+      className="customer-image"
+      style={{
+        background: theme.bg,
+        color: theme.color,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: 700,
+        fontSize: "22px",
+        letterSpacing: "0.5px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+        userSelect: "none",
+        border: "2px solid #ffffff",
+      }}
+      aria-label={`${name}'s avatar`}
+    >
+      <span>{initials}</span>
+    </div>
+  );
 }
 
 function CustomerReviews() {
@@ -95,11 +150,7 @@ function CustomerReviews() {
                 <p className="customer-review-text">{review.text}</p>
 
                 <div className="customer-info">
-                  <img
-                    src={review.image}
-                    alt={review.name}
-                    className="customer-image"
-                  />
+                  <CustomerAvatar name={review.name} image={review.image} />
 
                   <div className="customer-details">
                     <h3>{review.name}</h3>

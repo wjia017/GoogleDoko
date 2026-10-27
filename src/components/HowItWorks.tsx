@@ -1,4 +1,8 @@
 import { ArrowRight } from "lucide-react";
+import farmerImage from "../assets/images/how-it-works/farmer.png";
+import verificationImage from "../assets/images/how-it-works/verification.png";
+import packagingImage from "../assets/images/how-it-works/packaging.png";
+import deliveryImage from "../assets/images/how-it-works/delivery.png";
 
 const steps = [
   {
@@ -13,7 +17,7 @@ const steps = [
         produce
       </>
     ),
-    image: "/src/assets/images/how-it-works/farmer.jpg",
+    image: farmerImage,
   },
   {
     id: 2,
@@ -27,7 +31,7 @@ const steps = [
         and safety
       </>
     ),
-    image: "/src/assets/images/how-it-works/verification.jpg",
+    image: verificationImage,
   },
   {
     id: 3,
@@ -41,7 +45,7 @@ const steps = [
         fresh
       </>
     ),
-    image: "/src/assets/images/how-it-works/packaging.jpg",
+    image: packagingImage,
   },
   {
     id: 4,
@@ -53,7 +57,7 @@ const steps = [
         to your home
       </>
     ),
-    image: "/src/assets/images/how-it-works/delivery.jpg",
+    image: deliveryImage,
   },
 ];
 
@@ -65,15 +69,15 @@ function HowItWorks() {
         {/* Heading */}
         <div className="how-it-works-heading">
           <div className="heading-decoration">
-            <span className="heading-line"></span>
             <span className="heading-dot"></span>
+            <span className="heading-line"></span>
           </div>
 
           <h2>How It Works</h2>
 
           <div className="heading-decoration right">
-            <span className="heading-dot"></span>
             <span className="heading-line"></span>
+            <span className="heading-dot"></span>
           </div>
         </div>
 
@@ -84,38 +88,29 @@ function HowItWorks() {
         {/* Steps */}
         <div className="steps-container">
           {steps.map((step, index) => (
-            <div className="step-wrapper" key={step.id}>
-
+            <div className="step-item-group" key={step.id}>
               <div className="step">
-
                 {/* Image */}
                 <div className="step-image-wrapper">
-                  <span className="step-number">
-                    {step.id}
-                  </span>
-
-                  <div className="step-image">
-                    <img
-                      src={step.image}
-                      alt={step.title}
-                    />
-                  </div>
+                  <img
+                    src={step.image}
+                    alt={step.title}
+                    className="step-icon-img"
+                  />
                 </div>
 
                 {/* Text */}
                 <h3>{step.title}</h3>
 
                 <p>{step.description}</p>
-
               </div>
 
               {/* Arrow between steps */}
               {index < steps.length - 1 && (
-                <div className="step-arrow">
-                  <ArrowRight size={25} strokeWidth={2} />
+                <div className="step-arrow" aria-hidden="true">
+                  <ArrowRight size={22} strokeWidth={2.4} />
                 </div>
               )}
-
             </div>
           ))}
         </div>

@@ -1,55 +1,45 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useRef } from "react";
 import { Camera, UserRound } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 import AccountShell from "../../components/account/AccountShell";
 import { useAccount } from "../../context/AccountContext";
+import { fileToDataUrl } from "../../utils/fileToDataUrl";
 
-function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
+const profileSchema = yup.object({
+  firstName: yup.string().required("First name is required").trim(),
+  lastName: yup.string().required("Last name is required").trim(),
+  email: yup.string().required("Email is required").email("Enter a valid email address").trim(),
+  phone: yup.string().required("Phone number is required").trim(),
+  location: yup.string().default("").trim(),
+});
 
-async function fileToDataUrl(file: File) {
-  const original = await readFileAsDataUrl(file);
-
-  return new Promise<string>((resolve) => {
-    const image = new Image();
-    image.onload = () => {
-      const canvas = document.createElement("canvas");
-      const max = 480;
-      const scale = Math.min(1, max / Math.max(image.width, image.height));
-      canvas.width = Math.max(1, Math.round(image.width * scale));
-      canvas.height = Math.max(1, Math.round(image.height * scale));
-      const context = canvas.getContext("2d");
-      if (!context) {
-        resolve(original);
-        return;
-      }
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL("image/jpeg", 0.72));
-    };
-    image.onerror = () => resolve(original);
-    image.src = original;
-  });
-}
+type ProfileFormData = yup.InferType<typeof profileSchema>;
 
 function AccountProfile() {
   const { user, updateUser, setPhoto, showToast } = useAccount();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [draft, setDraft] = useState({
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    phone: user.phone,
-    location: user.location,
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ProfileFormData>({
+    resolver: yupResolver(profileSchema),
+    values: {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      location: user.location,
+    },
   });
 
   function cancel() {
-    setDraft({
+    reset({
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
@@ -59,16 +49,19 @@ function AccountProfile() {
     showToast("Changes discarded");
   }
 
-  function save(event: FormEvent) {
-    event.preventDefault();
-    updateUser({
-      firstName: draft.firstName.trim() || user.firstName,
-      lastName: draft.lastName.trim() || user.lastName,
-      email: draft.email.trim() || user.email,
-      phone: draft.phone.trim() || user.phone,
-      location: draft.location.trim() || user.location,
-    });
-    showToast("Profile updated successfully");
+  async function onSave(data: ProfileFormData) {
+    try {
+      await updateUser({
+        firstName: data.firstName.trim() || user.firstName,
+        lastName: data.lastName.trim() || user.lastName,
+        email: data.email.trim() || user.email,
+        phone: data.phone.trim() || user.phone,
+        location: data.location.trim() || user.location,
+      });
+      showToast("Profile updated successfully");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Could not save profile");
+    }
   }
 
   async function onPhoto(file?: File | null) {
@@ -78,7 +71,7 @@ function AccountProfile() {
 
     try {
       const dataUrl = await fileToDataUrl(file);
-      setPhoto(dataUrl);
+      await setPhoto(dataUrl);
       showToast("Profile photo updated");
     } catch {
       showToast("Could not upload that photo");
@@ -132,7 +125,7 @@ function AccountProfile() {
               type="button"
               className="account-btn ghost"
               onClick={() => {
-                setPhoto("");
+                void setPhoto("").catch(error => showToast(error.message));
                 showToast("Profile photo removed");
               }}
             >
@@ -142,53 +135,47 @@ function AccountProfile() {
         </div>
       </div>
 
-      <form className="account-form" onSubmit={save}>
+      <form className="account-form" onSubmit={handleSubmit(onSave)} noValidate>
         <div className="account-form-grid">
           <label>
             First Name
-            <input
-              value={draft.firstName}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, firstName: event.target.value }))
-              }
-            />
+            <input {...register("firstName")} style={{ borderColor: errors.firstName ? "#ef4444" : undefined }} />
+            {errors.firstName?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.firstName.message}
+              </span>
+            )}
           </label>
           <label>
             Last Name
-            <input
-              value={draft.lastName}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, lastName: event.target.value }))
-              }
-            />
+            <input {...register("lastName")} style={{ borderColor: errors.lastName ? "#ef4444" : undefined }} />
+            {errors.lastName?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.lastName.message}
+              </span>
+            )}
           </label>
           <label>
             Email
-            <input
-              type="email"
-              value={draft.email}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, email: event.target.value }))
-              }
-            />
+            <input type="email" {...register("email")} style={{ borderColor: errors.email ? "#ef4444" : undefined }} />
+            {errors.email?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.email.message}
+              </span>
+            )}
           </label>
           <label>
             Phone
-            <input
-              value={draft.phone}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, phone: event.target.value }))
-              }
-            />
+            <input {...register("phone")} style={{ borderColor: errors.phone ? "#ef4444" : undefined }} />
+            {errors.phone?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.phone.message}
+              </span>
+            )}
           </label>
           <label className="account-form-wide">
             Location
-            <input
-              value={draft.location}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, location: event.target.value }))
-              }
-            />
+            <input {...register("location")} />
           </label>
         </div>
 

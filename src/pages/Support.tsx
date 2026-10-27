@@ -1,8 +1,11 @@
+import { useState } from "react";
+import SupportModal from "../components/SupportModal";
 import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 
 function Support() {
+  const [open, setOpen] = useState(false);
   return (
     <>
       <TopBar />
@@ -17,12 +20,14 @@ function Support() {
               Track your delivery, ask about payments, or get help
               from our support team.
             </p>
-            <p>Email: support@googledoko.com</p>
-            <p>Phone: +91 111-111-1111</p>
+            <p><a href="mailto:support@googledoko.com">support@googledoko.com</a></p>
+            <button className="auth-btn" type="button" onClick={() => setOpen(true)}>Contact Support</button>
+            
           </div>
         </section>
       </main>
 
+      <SupportModal open={open} onClose={() => setOpen(false)} />
       <Footer />
     </>
   );

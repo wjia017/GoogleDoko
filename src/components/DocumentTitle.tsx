@@ -126,6 +126,56 @@ export function pageTitle(pathname: string, search: string) {
     return titleFromParts(["Login"]);
   }
 
+  if (pathname === "/signup") {
+    return titleFromParts(["Sign Up"]);
+  }
+
+  if (pathname === "/signup/customer") {
+    return titleFromParts(["Sign Up", "Customer"]);
+  }
+
+  if (pathname === "/signup/vendor/status") {
+    return titleFromParts(["Vendor", "Account Created"]);
+  }
+
+  if (pathname === "/signup/vendor") {
+    return titleFromParts(["Sign Up", "Vendor"]);
+  }
+
+  if (pathname === "/forgot-password") {
+    return titleFromParts(["Forgot Password"]);
+  }
+
+  if (pathname.startsWith("/admin")) {
+    const page = pathname.replace("/admin", "").replace(/^\//, "") || "Overview";
+    const labels: Record<string, string> = {
+      "": "Overview",
+      users: "Users",
+      vendors: "Vendors",
+      orders: "Orders",
+      products: "Products",
+    };
+    return titleFromParts(["Admin", labels[page] || "Overview"]);
+  }
+
+  if (pathname.startsWith("/vendor")) {
+    const page = pathname.replace("/vendor", "").replace(/^\//, "") || "Dashboard";
+    const labels: Record<string, string> = {
+      "": "Dashboard",
+      products: "Products",
+      "products/new": "Add Product",
+      orders: "Orders",
+      customers: "Customers",
+      sales: "Sales",
+      reports: "Reports",
+      analytics: "Reports",
+      reviews: "Reviews",
+      profile: "Store Profile",
+      settings: "Settings",
+    };
+    return titleFromParts(["Vendor", labels[page] || "Dashboard"]);
+  }
+
   if (pathname === "/search") {
     return titleFromParts(query ? ["Search", query] : ["Search"]);
   }

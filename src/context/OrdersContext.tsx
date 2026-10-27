@@ -10,6 +10,8 @@ import {
 import type { Product } from "../data/products";
 import { products } from "../data/products";
 import { orders as seedOrders, type Order } from "../data/orders";
+import { SHOP_SESSION_EVENT } from "../utils/shopSession";
+import { normalizeOrder } from "../utils/normalizeOrder";
 
 interface OrdersContextValue {
   orders: Order[];
@@ -90,6 +92,21 @@ export function OrdersProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(orders));
   }, [orders]);
+
+  useEffect(() => {
+    function hydrate(raw: unknown) {
+      if (!Array.isArray(raw)) return;
+      const normalized = raw.map(normalizeOrder).filter(Boolean) as Order[];
+      if (normalized.length > 0) {
+        setOrders(normalized);
+      }
+    }
+    function handleSession(event: Event) { hydrate((event as CustomEvent).detail?.orders || []); }
+    function handleOrders(event: Event) { hydrate((event as CustomEvent).detail); }
+    window.addEventListener(SHOP_SESSION_EVENT, handleSession);
+    window.addEventListener('googledoko-orders-updated', handleOrders);
+    return () => { window.removeEventListener(SHOP_SESSION_EVENT, handleSession); window.removeEventListener('googledoko-orders-updated', handleOrders); };
+  }, []);
 
   const value = useMemo<OrdersContextValue>(
     () => ({

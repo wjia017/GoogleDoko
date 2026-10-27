@@ -1,3 +1,5 @@
+import type { AccountRole, VendorProfile } from "./authOptions";
+
 export interface MockUser {
   firstName: string;
   lastName: string;
@@ -9,6 +11,8 @@ export interface MockUser {
   referralCode: string;
   photo: string;
   password: string;
+  role: AccountRole;
+  vendor?: VendorProfile;
 }
 
 export const defaultMockUser: MockUser = {
@@ -22,4 +26,5 @@ export const defaultMockUser: MockUser = {
   referralCode: "LAHANA320",
   photo: "",
   password: "password123",
+  role: "customer",
 };

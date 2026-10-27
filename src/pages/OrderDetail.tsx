@@ -1,4 +1,5 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Banknote,
@@ -9,16 +10,19 @@ import {
   RotateCcw,
   Truck,
   UserRound,
+  ShoppingBag,
 } from "lucide-react";
 
 import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 
 import { products } from "../data/products";
-import type { Order } from "../data/orders";
 import { useOrders } from "../context/OrdersContext";
+import { useAccount } from "../context/AccountContext";
 import { useCart } from "../context/CartContext";
+import { normalizeOrder, type NormalizedOrder } from "../utils/normalizeOrder";
+import { api, getToken } from "../api/client";
 
 const trackerSteps = [
   "Ordered",
@@ -28,15 +32,15 @@ const trackerSteps = [
   "Delivered",
 ] as const;
 
-function statusIndex(status: Order["status"]) {
+function statusIndex(status: string) {
   if (status === "Delivered") return 4;
   if (status === "Shipped") return 3;
-  if (status === "Processing") return 2;
+  if (status === "Processing" || status === "Pending") return 2;
   return 0;
 }
 
 function dateOnly(value: string) {
-  return value.split(",")[0].trim();
+  return (value || "").split(",")[0].trim();
 }
 
 function addDaysLabel(value: string, days: number) {
@@ -55,20 +59,22 @@ function addDaysLabel(value: string, days: number) {
   });
 }
 
-function enrichItem(item: Order["products"][number]) {
-  const catalog = products.find((product) => product.name === item.name);
+function enrichItem(item: any) {
+  const catalog = products.find(
+    (product) => product.name === item.name || product.id === item.productId
+  );
 
   return {
     ...item,
     origin: item.origin ?? catalog?.origin ?? "Nepal",
     seller: item.seller ?? catalog?.seller ?? "Local Seller",
-    unit: item.unit ?? catalog?.weight ?? "1 kg",
-    image: item.image || catalog?.image || "",
-    productId: catalog?.id,
+    unit: item.unit ?? item.weight ?? catalog?.weight ?? "1 kg",
+    image: item.image || catalog?.image || "/src/frontend/assets/images/products/apple.jpg",
+    productId: item.productId || catalog?.id,
   };
 }
 
-function trackerDates(order: Order) {
+function trackerDates(order: NormalizedOrder) {
   const ordered = dateOnly(order.date);
 
   return {
@@ -86,9 +92,31 @@ function trackerDates(order: Order) {
 function OrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { orders } = useOrders();
+  const { orders: accountOrders } = useAccount();
   const { addToCart } = useCart();
-  const order = orders.find((item) => item.id === id);
+
+  const localOrder =
+    location.state?.order ||
+    orders.find((item) => item.id === id) ||
+    accountOrders.find((item) => item.id === id);
+
+  const [order, setOrder] = useState<NormalizedOrder | null>(
+    localOrder ? normalizeOrder(localOrder) : null
+  );
+
+  useEffect(() => {
+    if (!order && id && getToken()) {
+      api.getOrderById(id)
+        .then((res) => {
+          if (res) setOrder(normalizeOrder(res));
+        })
+        .catch(() => {});
+    }
+  }, [order, id]);
+
+  const activeId = order?.id || id || "GD-ORD";
 
   if (!order) {
     return (
@@ -97,9 +125,20 @@ function OrderDetail() {
         <Navbar />
         <main className="order-detail-page">
           <div className="order-detail-missing">
-            <h1>Order not found</h1>
-            <p>This order is not available right now.</p>
-            <Link to="/orders">Back to orders</Link>
+            <h1>Looking up order #{activeId}...</h1>
+            <p>If you just placed this order, it will appear here shortly.</p>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "1rem" }}>
+              <Link to="/orders" className="od-action-primary" style={{ textDecoration: "none" }}>
+                Back to orders
+              </Link>
+              <button
+                type="button"
+                className="od-action-secondary"
+                onClick={() => navigate("/shop")}
+              >
+                Continue Shopping
+              </button>
+            </div>
           </div>
         </main>
         <Footer />
@@ -107,28 +146,44 @@ function OrderDetail() {
     );
   }
 
-  const items = order.products.map(enrichItem);
+  const items = (order.products || []).map(enrichItem);
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
-  const deliveryFee = 50;
+  const deliveryFee = order.deliveryFee ?? 50;
   const rawTotal = subtotal + deliveryFee;
   const discount = Math.max(0, rawTotal - order.total);
   const total = order.total;
   const currentStep = statusIndex(order.status);
   const dates = trackerDates(order);
-  const paid = order.status === "Delivered";
-  const orderId = order.id;
-  const orderDate = order.date;
-  const orderStatus = order.status;
+  const paid = order.status === "Delivered" || order.paymentStatus === "Paid";
 
   function reorder() {
     items.forEach((item) => {
-      const catalog = products.find((product) => product.name === item.name);
+      const catalog = products.find(
+        (product) => product.name === item.name || product.id === item.productId
+      );
 
       if (catalog) {
         addToCart(catalog, item.quantity);
+      } else {
+        addToCart(
+          {
+            id: item.productId || `P-${item.name}`,
+            name: item.name,
+            category: "Organic Produce",
+            price: item.price,
+            weight: item.unit || "1 kg",
+            image: item.image,
+            rating: 4.8,
+            sold: "100+",
+            origin: item.origin || "Nepal",
+            seller: item.seller || "Local Seller",
+            gallery: [item.image],
+          },
+          item.quantity
+        );
       }
     });
 
@@ -136,11 +191,12 @@ function OrderDetail() {
   }
 
   function downloadInvoice() {
+    if (!order) return;
     const lines = [
       "GoogleDoko Invoice",
-      `Order #${orderId}`,
-      `Placed on ${orderDate}`,
-      `Status: ${orderStatus}`,
+      `Order #${order.id}`,
+      `Placed on ${order.date}`,
+      `Status: ${order.status}`,
       "",
       "Items:",
       ...items.map(
@@ -153,17 +209,18 @@ function OrderDetail() {
       `Discount: Rs ${discount}`,
       `Total: Rs ${total}`,
       "",
-      "Payment Method: Cash on Delivery",
+      `Payment Method: ${order.paymentMethod}`,
       `Payment Status: ${paid ? "Paid" : "Pending"}`,
       "Delivery: Standard Delivery",
-      "Address: Lahana Lawaju, Kathmandu, Nepal",
+      `Recipient: ${order.recipientName}`,
+      `Address: ${order.deliveryAddress}`,
     ].join("\n");
 
     const blob = new Blob([lines], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `GoogleDoko-Invoice-${orderId}.txt`;
+    link.download = `GoogleDoko-Invoice-${order.id}.txt`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -237,7 +294,7 @@ function OrderDetail() {
               <h2>Ordered Items</h2>
 
               {items.map((item) => (
-                <article className="od-item" key={`${item.name}-${item.origin}`}>
+                <article className="od-item" key={`${item.name}-${item.origin}-${item.productId}`}>
                   <img src={item.image} alt={item.name} />
 
                   <div className="od-item-info">
@@ -271,8 +328,9 @@ function OrderDetail() {
                   <MapPin size={20} />
                   <div>
                     <span>Delivery address</span>
-                    <strong>Lahana Lawaju</strong>
-                    <p>Kathmandu, Nepal</p>
+                    <strong>{order.recipientName || "Valued Customer"}</strong>
+                    <p>{order.deliveryAddress || "Kathmandu, Nepal"}</p>
+                    {order.recipientPhone && <small>Contact: {order.recipientPhone}</small>}
                   </div>
                 </div>
 
@@ -326,7 +384,7 @@ function OrderDetail() {
                   <Banknote size={20} />
                   <div>
                     <span>Payment Method</span>
-                    <strong>Cash on Delivery</strong>
+                    <strong>{order.paymentMethod}</strong>
                   </div>
                 </div>
 
@@ -344,7 +402,8 @@ function OrderDetail() {
           </section>
 
           <div className="od-actions">
-            <Link to={`/orders/${order.id}/track`} className="od-action-primary">
+            <Link to={`/orders/${order.id}/track`} className="od-action-primary" style={{ textDecoration: "none" }}>
+              <Truck size={18} />
               Track Order
             </Link>
             <button type="button" className="od-action-secondary" onClick={downloadInvoice}>
@@ -354,6 +413,14 @@ function OrderDetail() {
             <button type="button" className="od-action-primary" onClick={reorder}>
               <RotateCcw size={18} />
               Reorder
+            </button>
+            <button
+              type="button"
+              className="od-action-secondary"
+              onClick={() => navigate("/shop")}
+            >
+              <ShoppingBag size={18} />
+              Continue Shopping
             </button>
           </div>
         </div>

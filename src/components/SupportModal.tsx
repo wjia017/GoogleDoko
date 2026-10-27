@@ -1,7 +1,11 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
-const SUPPORT_EMAIL = "support@googledoko.com";
+import { api } from "../api/client";
+
 const MAX_INQUIRY_WORDS = 500;
 
 interface SupportModalProps {
@@ -21,67 +25,54 @@ function limitWords(value: string) {
   return words.slice(0, MAX_INQUIRY_WORDS).join(" ");
 }
 
-async function sendInquiryEmail(payload: {
-  fullName: string;
-  address: string;
-  contactNumber: string;
-  gmail: string;
-  inquiry: string;
-}) {
-  const body = {
-    _subject: `GoogleDoko inquiry from ${payload.fullName}`,
-    _template: "table",
-    _captcha: "false",
-    Name: payload.fullName,
-    Address: payload.address,
-    "Contact number": payload.contactNumber,
-    Gmail: payload.gmail,
-    Inquiry: payload.inquiry,
-    _replyto: payload.gmail,
-  };
+const supportSchema = yup.object({
+  fullName: yup.string().required("Please enter your full name").trim(),
+  address: yup.string().required("Please enter your address").trim(),
+  contactNumber: yup.string().required("Please enter your contact number").trim(),
+  gmail: yup
+    .string()
+    .email("Please enter a valid Gmail / email address")
+    .required("Please enter your email address")
+    .trim(),
+  inquiry: yup
+    .string()
+    .required("Please enter your inquiry")
+    .test("max-words", `Inquiry can be at most ${MAX_INQUIRY_WORDS} words`, (val) =>
+      countWords(val || "") <= MAX_INQUIRY_WORDS
+    )
+    .trim(),
+});
 
-  try {
-    const response = await fetch(
-      `https://formsubmit.co/ajax/${SUPPORT_EMAIL}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(body),
-      },
-    );
-
-    if (response.ok) {
-      return;
-    }
-  } catch {
-    // Fall through to Gmail compose so the inquiry is still sent.
-  }
-
-  const mailBody = [
-    `Name: ${payload.fullName}`,
-    `Address: ${payload.address}`,
-    `Contact number: ${payload.contactNumber}`,
-    `Gmail: ${payload.gmail}`,
-    "",
-    "Inquiry:",
-    payload.inquiry,
-  ].join("\n");
-
-  window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(`GoogleDoko inquiry from ${payload.fullName}`)}&body=${encodeURIComponent(mailBody)}`;
-}
+type SupportFormData = yup.InferType<typeof supportSchema>;
 
 function SupportModal({ open, onClose }: SupportModalProps) {
-  const [fullName, setFullName] = useState("");
-  const [address, setAddress] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [gmail, setGmail] = useState("");
-  const [inquiry, setInquiry] = useState("");
-  const [error, setError] = useState("");
+  const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
   const [sending, setSending] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<SupportFormData>({
+    resolver: yupResolver(supportSchema),
+    defaultValues: {
+      fullName: "",
+      address: "",
+      contactNumber: "",
+      gmail: "",
+      inquiry: "",
+    },
+  });
+
+  const fullName = watch("fullName");
+  const address = watch("address");
+  const contactNumber = watch("contactNumber");
+  const gmail = watch("gmail");
+  const inquiry = watch("inquiry");
 
   useEffect(() => {
     if (!open) {
@@ -107,46 +98,25 @@ function SupportModal({ open, onClose }: SupportModalProps) {
     return null;
   }
 
-  const wordCount = countWords(inquiry);
+  const wordCount = countWords(inquiry || "");
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setError("");
+  const onSubmit = async (data: SupportFormData) => {
+    setServerError("");
     setSuccess("");
-
-    if (!fullName.trim() || !address.trim() || !contactNumber.trim() || !gmail.trim() || !inquiry.trim()) {
-      setError("Please fill in all fields.");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail.trim())) {
-      setError("Please enter a valid Gmail / email address.");
-      return;
-    }
-
-    if (wordCount > MAX_INQUIRY_WORDS) {
-      setError(`Inquiry can be at most ${MAX_INQUIRY_WORDS} words.`);
-      return;
-    }
-
     setSending(true);
 
     try {
-      await sendInquiryEmail({
-        fullName: fullName.trim(),
-        address: address.trim(),
-        contactNumber: contactNumber.trim(),
-        gmail: gmail.trim(),
-        inquiry: inquiry.trim(),
+      const result = await api.support({
+        fullName: data.fullName.trim(),
+        address: data.address.trim(),
+        contactNumber: data.contactNumber.trim(),
+        gmail: data.gmail.trim(),
+        inquiry: data.inquiry.trim(),
       });
-      setSuccess("Message sent to support@googledoko.com.");
-      setFullName("");
-      setAddress("");
-      setContactNumber("");
-      setGmail("");
-      setInquiry("");
+      setSuccess(`Your support request #${result.id} has been received.`);
+      reset();
     } catch {
-      setError("Message could not be sent. Please try again.");
+      setServerError("Message could not be sent. Please try again.");
     } finally {
       setSending(false);
     }
@@ -175,76 +145,103 @@ function SupportModal({ open, onClose }: SupportModalProps) {
         </button>
 
         <h2 id="support-modal-title">Contact Support</h2>
-        <p>Send your inquiry to our support Gmail.</p>
+        <p>Send your inquiry to our support team.</p>
 
-        <form className="support-modal-form" onSubmit={handleSubmit}>
+        <form className="support-modal-form" onSubmit={handleSubmit(onSubmit)}>
           <label>
             Full name
             <input
               type="text"
-              value={fullName}
-              onChange={(event) => setFullName(event.target.value)}
+              {...register("fullName")}
+              value={fullName || ""}
+              onChange={(e) => setValue("fullName", e.target.value, { shouldValidate: true })}
               placeholder="Your full name"
-              required
             />
+            {errors.fullName?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.fullName.message}
+              </span>
+            )}
           </label>
 
           <label>
             Address
             <input
               type="text"
-              value={address}
-              onChange={(event) => setAddress(event.target.value)}
+              {...register("address")}
+              value={address || ""}
+              onChange={(e) => setValue("address", e.target.value, { shouldValidate: true })}
               placeholder="Your address"
-              required
             />
+            {errors.address?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.address.message}
+              </span>
+            )}
           </label>
 
           <label>
             Contact number
             <input
               type="tel"
-              value={contactNumber}
-              onChange={(event) => setContactNumber(event.target.value)}
-              placeholder="Your contact number"
-              required
+              {...register("contactNumber")}
+              value={contactNumber || ""}
+              onChange={(e) => setValue("contactNumber", e.target.value, { shouldValidate: true })}
+              placeholder="Your phone number"
             />
+            {errors.contactNumber?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.contactNumber.message}
+              </span>
+            )}
           </label>
 
           <label>
             Gmail
             <input
               type="email"
-              value={gmail}
-              onChange={(event) => setGmail(event.target.value)}
-              placeholder="you@gmail.com"
-              required
+              {...register("gmail")}
+              value={gmail || ""}
+              onChange={(e) => setValue("gmail", e.target.value, { shouldValidate: true })}
+              placeholder="name@gmail.com"
             />
+            {errors.gmail?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.gmail.message}
+              </span>
+            )}
           </label>
 
           <label>
-            Inquiry
+            Inquiry (up to {MAX_INQUIRY_WORDS} words)
             <textarea
-              value={inquiry}
-              onChange={(event) => setInquiry(limitWords(event.target.value))}
-              placeholder="Write your inquiry"
-              rows={5}
-              required
+              rows={4}
+              {...register("inquiry")}
+              value={inquiry || ""}
+              onChange={(event) =>
+                setValue("inquiry", limitWords(event.target.value), { shouldValidate: true })
+              }
+              placeholder="Describe your inquiry..."
             />
-            <span className="support-word-count">
-              {wordCount}/{MAX_INQUIRY_WORDS} words
-            </span>
+            <small style={{ color: wordCount > MAX_INQUIRY_WORDS ? "#ef4444" : "#6f8a7a" }}>
+              {wordCount} / {MAX_INQUIRY_WORDS} words
+            </small>
+            {errors.inquiry?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.inquiry.message}
+              </span>
+            )}
           </label>
 
-          {error ? <p className="support-modal-error">{error}</p> : null}
-          {success ? <p className="support-modal-success">{success}</p> : null}
+          {serverError && <p className="support-modal-error">{serverError}</p>}
+          {success && <p className="support-modal-success">{success}</p>}
 
           <button
             type="submit"
             className="support-send-button"
             disabled={sending}
           >
-            {sending ? "Sending..." : "Send Message"}
+            {sending ? "Sending..." : "Submit Inquiry"}
           </button>
         </form>
       </div>

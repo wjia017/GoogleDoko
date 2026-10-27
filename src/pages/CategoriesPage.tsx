@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Leaf } from "lucide-react";
-import { useSearchParams, Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
-import ProductCard from "../components/ProductCard";
-import Footer from "../components/Footer";
+import Navbar from "../components/layout/Navbar";
+import ProductCard from "../components/product/ProductCard";
+import Footer from "../components/layout/Footer";
 import Pagination, { paginateItems } from "../components/Pagination";
 
-import { products } from "../data/products";
-import categoriesBanner from "../assets/images/categories/categories-banner.jpg";
-import categoryPromo from "../assets/images/categories/category-promo.jpg";
+import { products, type Product } from "../data/products";
+import { useGetProductsQuery } from "../store/api/apiSlice";
+import categoriesHeroBanner from "../assets/images/categories/categories-hero-banner.png";
+import categoryBottomPromo from "../assets/images/categories/category-bottom-promo.png";
 
 type Category =
     | "All"
@@ -18,7 +19,8 @@ type Category =
     | "Vegetables"
     | "Spices"
     | "Dairy & Eggs"
-    | "Grains";
+    | "Grains"
+    | "Honey";
 
 const categoryOptions: Category[] = [
     "All",
@@ -27,6 +29,7 @@ const categoryOptions: Category[] = [
     "Spices",
     "Dairy & Eggs",
     "Grains",
+    "Honey",
 ];
 
 function CategoriesPage() {
@@ -34,13 +37,18 @@ function CategoriesPage() {
     const categoryFromUrl = searchParams.get("category");
     const placeFromUrl = searchParams.get("place");
 
-    const [selectedCategory, setSelectedCategory] =
-        useState<Category>(
-            categoryFromUrl &&
-            categoryOptions.includes(categoryFromUrl as Category)
-                ? (categoryFromUrl as Category)
-                : "All",
-        );
+    const { data: serverProducts } = useGetProductsQuery();
+    const allProducts = (
+        serverProducts && serverProducts.length > 0
+            ? (serverProducts as unknown as Product[])
+            : products
+    );
+
+    const [selectedCategory, setSelectedCategory] = useState<Category>(
+        categoryFromUrl && categoryOptions.includes(categoryFromUrl as Category)
+            ? (categoryFromUrl as Category)
+            : "All",
+    );
     const [page, setPage] = useState(1);
 
     useEffect(() => {
@@ -58,8 +66,8 @@ function CategoriesPage() {
 
     const filteredProducts = useMemo(() => {
         const byPlace = placeFromUrl
-            ? products.filter((product) => product.origin === placeFromUrl)
-            : products;
+            ? allProducts.filter((product) => product.origin === placeFromUrl)
+            : allProducts;
 
         if (selectedCategory === "All") {
             return byPlace;
@@ -68,7 +76,7 @@ function CategoriesPage() {
         return byPlace.filter(
             (product) => product.category === selectedCategory,
         );
-    }, [placeFromUrl, selectedCategory]);
+    }, [allProducts, placeFromUrl, selectedCategory]);
 
     const paged = paginateItems(filteredProducts, page);
 
@@ -89,61 +97,56 @@ function CategoriesPage() {
             <TopBar />
             <Navbar />
 
-            <main className="categories-page">
-
-                {/* Page Banner */}
-                {!placeFromUrl && (
-                <section className="categories-banner">
-                    <div className="categories-banner-content">
-                        <img
-                            src={categoriesBanner}
-                            alt=""
-                            className="categories-banner-photo"
-                        />
-                        <div className="offer-sr-only">
-                            <p>Our fresh produce</p>
-                            <h1>Fresh Choices for a Healthier You</h1>
+            <main className="shop-page">
+                {/* Hero Banner */}
+                {placeFromUrl ? (
+                    <section className="shop-banner">
+                        <div className="shop-banner-content">
+                            <span>ORIGIN: {placeFromUrl.toUpperCase()}</span>
+                            <h1>
+                                Products from {placeFromUrl.split(",")[0].trim()}
+                            </h1>
                             <p>
-                                Browse through our wide range of fresh, organic
-                                and high-quality products.
-                            </p>
-                            <p>
-                                100% Natural. Freshly Harvested. Safe and
-                                Hygienic. Better Health For You. Good Food
-                                Good Mood.
+                                Browse authentic items and local harvests sourced directly from {placeFromUrl}.
                             </p>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                ) : (
+                    <section className="categories-hero-banner-section">
+                        <div className="categories-hero-banner-container">
+                            <img
+                                src={categoriesHeroBanner}
+                                alt="Our Categories - Fresh Choices for a Healthier You"
+                                className="categories-hero-banner-img"
+                            />
+                        </div>
+                    </section>
                 )}
 
-
                 {/* Category Filter */}
-                <section className="category-filter-section">
-                    <div className="category-filter">
+                {!placeFromUrl && (
+                    <section className="category-filter-section">
+                        <div className="category-filter">
+                            {categoryOptions.map((category) => (
+                                <button
+                                    key={category}
+                                    type="button"
+                                    className={
+                                        selectedCategory === category
+                                            ? "category-filter-button active"
+                                            : "category-filter-button"
+                                    }
+                                    onClick={() => chooseCategory(category)}
+                                >
+                                    {category}
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
-                        {categoryOptions.map((category) => (
-                            <button
-                                key={category}
-                                type="button"
-                                className={
-                                    selectedCategory === category
-                                        ? "category-filter-button active"
-                                        : "category-filter-button"
-                                }
-                                onClick={() => chooseCategory(category)}
-                            >
-                                {category}
-                            </button>
-                        ))}
-
-                    </div>
-                </section>
-
-
-                {/* Products */}
+                {/* Products Section */}
                 <section className="all-products-section">
-
                     <div className="all-products-heading">
                         <h2>
                             {placeFromUrl
@@ -160,39 +163,30 @@ function CategoriesPage() {
                         </p>
                     </div>
 
-
                     {filteredProducts.length > 0 ? (
                         <>
-                        <div className="categories-products-grid">
+                            <div className="categories-products-grid">
+                                {paged.items.map((product) => (
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                    />
+                                ))}
+                            </div>
 
-                            {paged.items.map((product) => (
-                                <ProductCard
-                                    key={product.id}
-                                    product={product}
-                                />
-                            ))}
-
-                        </div>
-
-                        <Pagination
-                            page={paged.current}
-                            totalPages={paged.totalPages}
-                            onChange={changePage}
-                        />
+                            <Pagination
+                                page={paged.current}
+                                totalPages={paged.totalPages}
+                                onChange={changePage}
+                            />
                         </>
                     ) : (
                         <div className="no-products-message">
                             <Leaf size={40} />
-
-                            <h3>
-                                No products available yet
-                            </h3>
-
+                            <h3>No products available yet</h3>
                             <p>
-                                Products from this category will be
-                                added soon.
+                                Products from this category will be added soon.
                             </p>
-
                             <button
                                 type="button"
                                 onClick={() => chooseCategory("All")}
@@ -201,29 +195,26 @@ function CategoriesPage() {
                             </button>
                         </div>
                     )}
-
                 </section>
 
-
-                {/* Promotional Section */}
-                <section className="categories-bottom-promo">
-                    <div className="categories-bottom-promo-frame">
-                        <img
-                            src={categoryPromo}
-                            alt=""
-                            className="categories-bottom-promo-photo"
-                        />
-                        <div className="offer-sr-only">
-                            <h2>Fresh Products Better Living</h2>
-                            <p>Organic. Healthy. Natural.</p>
-                            <p>Everything you need for a healthier lifestyle.</p>
+                {/* Bottom Promo Banner */}
+                {!placeFromUrl && (
+                    <section className="category-bottom-promo-section">
+                        <div className="category-bottom-promo-container">
+                            <Link
+                                to="/shop"
+                                className="category-bottom-promo-card"
+                                aria-label="Fresh Products Better Living - Buy Now"
+                            >
+                                <img
+                                    src={categoryBottomPromo}
+                                    alt="Fresh Products Better Living - Buy Now"
+                                    className="category-bottom-promo-img"
+                                />
+                            </Link>
                         </div>
-                        <Link to="/shop" className="categories-bottom-promo-hotspot">
-                            Buy Now
-                        </Link>
-                    </div>
-                </section>
-
+                    </section>
+                )}
             </main>
 
             <Footer />

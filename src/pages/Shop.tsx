@@ -1,18 +1,23 @@
 import { useState } from "react";
 
 import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
-import ProductCard from "../components/ProductCard";
-import Footer from "../components/Footer";
+import Navbar from "../components/layout/Navbar";
+import ProductCard from "../components/product/ProductCard";
+import Footer from "../components/layout/Footer";
 import Pagination, {
   paginateItems,
 } from "../components/Pagination";
 
-import { products } from "../data/products";
+import { products, type Product } from "../data/products";
+import { useGetProductsQuery } from "../store/api/apiSlice";
 
 function Shop() {
   const [page, setPage] = useState(1);
-  const paged = paginateItems(products, page);
+  const { data: serverProducts } = useGetProductsQuery();
+  const allProducts = (serverProducts && serverProducts.length > 0
+    ? (serverProducts as unknown as Product[])
+    : products);
+  const paged = paginateItems(allProducts, page);
 
   function changePage(nextPage: number) {
     setPage(nextPage);

@@ -1,11 +1,28 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 import AccountModal from "../../components/account/AccountModal";
 import AccountShell from "../../components/account/AccountShell";
 import { useAccount } from "../../context/AccountContext";
 import type { MockAddress } from "../../data/mockAddresses";
 
-const emptyAddress: Omit<MockAddress, "id"> = {
+const addressSchema = yup.object({
+  label: yup.string().required("Label is required").trim(),
+  fullName: yup.string().required("Full name is required").trim(),
+  phone: yup.string().required("Phone is required").trim(),
+  province: yup.string().required("Province is required").trim(),
+  city: yup.string().required("City is required").trim(),
+  area: yup.string().required("Area is required").trim(),
+  street: yup.string().required("Street is required").trim(),
+  postalCode: yup.string().default("").trim(),
+  isDefault: yup.boolean().default(false),
+});
+
+type AddressFormData = yup.InferType<typeof addressSchema>;
+
+const emptyAddress: AddressFormData = {
   label: "Home",
   fullName: "",
   phone: "",
@@ -27,30 +44,56 @@ function AccountAddresses() {
   } = useAccount();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState(emptyAddress);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AddressFormData>({
+    resolver: yupResolver(addressSchema),
+    defaultValues: emptyAddress,
+  });
 
   function openAdd() {
     setEditingId(null);
-    setDraft(emptyAddress);
+    reset(emptyAddress);
     setOpen(true);
   }
 
   function openEdit(address: MockAddress) {
     const { id, ...rest } = address;
     setEditingId(id);
-    setDraft(rest);
+    reset({
+      label: rest.label,
+      fullName: rest.fullName,
+      phone: rest.phone,
+      province: rest.province,
+      city: rest.city,
+      area: rest.area,
+      street: rest.street,
+      postalCode: rest.postalCode,
+      isDefault: Boolean(rest.isDefault),
+    });
     setOpen(true);
   }
 
-  function save(event: FormEvent) {
-    event.preventDefault();
-    if (!draft.fullName.trim() || !draft.phone.trim() || !draft.city.trim()) {
-      return;
-    }
+  function onSave(data: AddressFormData) {
+    const payload = {
+      label: data.label,
+      fullName: data.fullName,
+      phone: data.phone,
+      province: data.province,
+      city: data.city,
+      area: data.area,
+      street: data.street,
+      postalCode: data.postalCode || "",
+      isDefault: Boolean(data.isDefault),
+    };
     if (editingId) {
-      updateAddress(editingId, draft);
+      updateAddress(editingId, payload);
     } else {
-      addAddress(draft);
+      addAddress(payload);
     }
     setOpen(false);
   }
@@ -112,7 +155,7 @@ function AccountAddresses() {
         title={editingId ? "Edit Address" : "Add Address"}
         onClose={() => setOpen(false)}
       >
-        <form className="account-form" onSubmit={save}>
+        <form className="account-form" onSubmit={handleSubmit(onSave)} noValidate>
           {(
             [
               ["label", "Label"],
@@ -127,21 +170,18 @@ function AccountAddresses() {
           ).map(([key, label]) => (
             <label key={key}>
               {label}
-              <input
-                value={draft[key]}
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, [key]: event.target.value }))
-                }
-              />
+              <input {...register(key)} style={{ borderColor: errors[key] ? "#ef4444" : undefined }} />
+              {errors[key]?.message && (
+                <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                  {errors[key]?.message}
+                </span>
+              )}
             </label>
           ))}
           <label className="account-check">
             <input
               type="checkbox"
-              checked={draft.isDefault}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, isDefault: event.target.checked }))
-              }
+              {...register("isDefault")}
             />
             Set as default
           </label>

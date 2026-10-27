@@ -3,8 +3,8 @@ import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import TopBar from "./TopBar";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
+import Navbar from "./layout/Navbar";
+import Footer from "./layout/Footer";
 
 const steps = [
   { id: 1, label: "Delivery", path: "/checkout" },

@@ -1,72 +1,95 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useRef } from "react";
+import { Camera, UserRound } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 import AccountShell from "../../components/account/AccountShell";
 import { useAccount } from "../../context/AccountContext";
+import { fileToDataUrl } from "../../utils/fileToDataUrl";
 
-async function fileToDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const image = new Image();
-    const url = URL.createObjectURL(file);
-    image.onload = () => {
-      const canvas = document.createElement("canvas");
-      const max = 480;
-      const scale = Math.min(1, max / Math.max(image.width, image.height));
-      canvas.width = Math.max(1, image.width * scale);
-      canvas.height = Math.max(1, image.height * scale);
-      canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL("image/jpeg", 0.72));
-      URL.revokeObjectURL(url);
-    };
-    image.onerror = reject;
-    image.src = url;
-  });
-}
+const profileSchema = yup.object({
+  firstName: yup.string().required("First name is required").trim(),
+  lastName: yup.string().required("Last name is required").trim(),
+  email: yup.string().required("Email is required").email("Enter a valid email address").trim(),
+  phone: yup.string().required("Phone number is required").trim(),
+  location: yup.string().default("").trim(),
+});
+
+type ProfileFormData = yup.InferType<typeof profileSchema>;
 
 function AccountProfile() {
   const { user, updateUser, setPhoto, showToast } = useAccount();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(user);
 
-  function startEdit() {
-    setDraft(user);
-    setEditing(true);
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ProfileFormData>({
+    resolver: yupResolver(profileSchema),
+    values: {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      location: user.location,
+    },
+  });
 
   function cancel() {
-    setDraft(user);
-    setEditing(false);
-  }
-
-  function save(event: FormEvent) {
-    event.preventDefault();
-    updateUser({
-      firstName: draft.firstName.trim() || user.firstName,
-      lastName: draft.lastName.trim() || user.lastName,
-      email: draft.email.trim() || user.email,
-      phone: draft.phone.trim() || user.phone,
-      location: draft.location.trim() || user.location,
+    reset({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      location: user.location,
     });
-    setEditing(false);
-    showToast("Profile updated successfully");
+    showToast("Changes discarded");
   }
 
-  async function onPhoto(file?: File) {
+  async function onSave(data: ProfileFormData) {
+    try {
+      await updateUser({
+        firstName: data.firstName.trim() || user.firstName,
+        lastName: data.lastName.trim() || user.lastName,
+        email: data.email.trim() || user.email,
+        phone: data.phone.trim() || user.phone,
+        location: data.location.trim() || user.location,
+      });
+      showToast("Profile updated successfully");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Could not save profile");
+    }
+  }
+
+  async function onPhoto(file?: File | null) {
     if (!file) {
       return;
     }
-    const dataUrl = await fileToDataUrl(file);
-    setPhoto(dataUrl);
-    showToast("Profile photo updated");
-  }
 
-  const source = editing ? draft : user;
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      await setPhoto(dataUrl);
+      showToast("Profile photo updated");
+    } catch {
+      showToast("Could not upload that photo");
+    }
+
+    if (fileRef.current) {
+      fileRef.current.value = "";
+    }
+  }
 
   return (
     <AccountShell title="Personal Information">
       <div className="account-profile-photo">
-        <div
-          className="profile-avatar"
+        <button
+          type="button"
+          className="profile-avatar account-avatar-button"
+          onClick={() => fileRef.current?.click()}
+          aria-label="Upload profile photo"
           style={
             user.photo
               ? {
@@ -76,13 +99,18 @@ function AccountProfile() {
                 }
               : undefined
           }
-        />
-        <div>
+        >
+          {user.photo ? null : <UserRound size={48} strokeWidth={1.6} />}
+          <span className="account-avatar-camera">
+            <Camera size={16} />
+          </span>
+        </button>
+        <div className="account-form-actions">
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
-            hidden
+            className="account-file-input"
             onChange={(event) => onPhoto(event.target.files?.[0])}
           />
           <button
@@ -97,7 +125,7 @@ function AccountProfile() {
               type="button"
               className="account-btn ghost"
               onClick={() => {
-                setPhoto("");
+                void setPhoto("").catch(error => showToast(error.message));
                 showToast("Profile photo removed");
               }}
             >
@@ -107,76 +135,57 @@ function AccountProfile() {
         </div>
       </div>
 
-      <form className="account-form" onSubmit={save}>
+      <form className="account-form" onSubmit={handleSubmit(onSave)} noValidate>
         <div className="account-form-grid">
           <label>
             First Name
-            <input
-              value={source.firstName}
-              disabled={!editing}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, firstName: event.target.value }))
-              }
-            />
+            <input {...register("firstName")} style={{ borderColor: errors.firstName ? "#ef4444" : undefined }} />
+            {errors.firstName?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.firstName.message}
+              </span>
+            )}
           </label>
           <label>
             Last Name
-            <input
-              value={source.lastName}
-              disabled={!editing}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, lastName: event.target.value }))
-              }
-            />
+            <input {...register("lastName")} style={{ borderColor: errors.lastName ? "#ef4444" : undefined }} />
+            {errors.lastName?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.lastName.message}
+              </span>
+            )}
           </label>
           <label>
             Email
-            <input
-              type="email"
-              value={source.email}
-              disabled={!editing}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, email: event.target.value }))
-              }
-            />
+            <input type="email" {...register("email")} style={{ borderColor: errors.email ? "#ef4444" : undefined }} />
+            {errors.email?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.email.message}
+              </span>
+            )}
           </label>
           <label>
             Phone
-            <input
-              value={source.phone}
-              disabled={!editing}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, phone: event.target.value }))
-              }
-            />
+            <input {...register("phone")} style={{ borderColor: errors.phone ? "#ef4444" : undefined }} />
+            {errors.phone?.message && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {errors.phone.message}
+              </span>
+            )}
           </label>
           <label className="account-form-wide">
             Location
-            <input
-              value={source.location}
-              disabled={!editing}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, location: event.target.value }))
-              }
-            />
+            <input {...register("location")} />
           </label>
         </div>
 
         <div className="account-form-actions">
-          {editing ? (
-            <>
-              <button type="submit" className="account-btn">
-                Save Changes
-              </button>
-              <button type="button" className="account-btn ghost" onClick={cancel}>
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button type="button" className="account-btn" onClick={startEdit}>
-              Edit
-            </button>
-          )}
+          <button type="submit" className="account-btn">
+            Save Changes
+          </button>
+          <button type="button" className="account-btn ghost" onClick={cancel}>
+            Cancel
+          </button>
         </div>
       </form>
     </AccountShell>

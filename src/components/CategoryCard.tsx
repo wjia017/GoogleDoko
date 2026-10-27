@@ -36,13 +36,19 @@ function CategoryCard({
     <Link to={to} className={`category-card ${theme}`}>
       {/* Image */}
       <div className="category-image">
-        <img src={image} alt={name} />
+        <img
+          src={image}
+          alt={name}
+          onError={(e) => {
+            e.currentTarget.src = "/src/frontend/assets/images/categories/category-promo.jpg";
+          }}
+        />
       </div>
 
       {/* Information */}
       <div className="category-info">
         <div className="category-icon">
-          <Icon size={38} strokeWidth={1.8} />
+          <Icon size={24} strokeWidth={1.8} className="category-svg-icon" />
         </div>
 
         <div className="category-text">

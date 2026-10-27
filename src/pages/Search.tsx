@@ -1,34 +1,67 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowRight, Leaf, MapPin, Search as SearchIcon } from "lucide-react";
+import { ArrowRight, Leaf, Loader2, MapPin, Search as SearchIcon } from "lucide-react";
 
 import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import ProductCard from "../components/ProductCard";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
+import ProductCard from "../components/product/ProductCard";
 import Pagination, {
   paginateItems,
   PLACES_PAGE_SIZE,
 } from "../components/Pagination";
 
-import { searchPlaces, searchProducts } from "../data/search";
+import { searchPlaces } from "../data/search";
+import { api } from "../api/client";
+import type { Product } from "../data/products";
 
 function Search() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
   const [page, setPage] = useState(1);
   const [placesPage, setPlacesPage] = useState(1);
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const matchedProducts = searchProducts(query);
-  const matchedPlaces = searchPlaces(query);
-  const total = matchedProducts.length + matchedPlaces.length;
-  const paged = paginateItems(matchedProducts, page);
-  const pagedPlaces = paginateItems(matchedPlaces, placesPage, PLACES_PAGE_SIZE);
-
+  // Backend search: fires whenever query changes
   useEffect(() => {
     setPage(1);
     setPlacesPage(1);
+
+    if (!query) {
+      setApiProducts([]);
+      return;
+    }
+
+    setLoading(true);
+    api
+      .search(query)
+      .then((results) => {
+        // Map DB rows to Product shape
+        const mapped = results.map((r: any) => ({
+          id: String(r.id),
+          name: r.name,
+          category: r.category,
+          price: r.price,
+          rating: r.rating,
+          sold: r.sold,
+          origin: r.origin,
+          seller: r.seller,
+          image: r.image,
+          weight: r.weight,
+          stock: r.stock,
+          gallery: [r.image],
+        })) as Product[];
+        setApiProducts(mapped);
+      })
+      .catch(() => setApiProducts([]))
+      .finally(() => setLoading(false));
   }, [query]);
+
+  const matchedPlaces = searchPlaces(query);
+  const total = apiProducts.length + matchedPlaces.length;
+  const paged = paginateItems(apiProducts, page);
+  const pagedPlaces = paginateItems(matchedPlaces, placesPage, PLACES_PAGE_SIZE);
 
   function changePage(nextPage: number) {
     setPage(nextPage);
@@ -48,11 +81,13 @@ function Search() {
             <span>SEARCH</span>
             <h1>
               {query
-                ? `Results for “${query}”`
+                ? `Results for "${query}"`
                 : "Search products or places"}
             </h1>
             <p>
-              {query
+              {loading
+                ? "Searching…"
+                : query
                 ? `${total} match${total === 1 ? "" : "es"} found`
                 : "Type a product name, category, or place in the search bar."}
             </p>
@@ -77,6 +112,9 @@ function Search() {
                     src={place.image}
                     alt={place.name}
                     className="place-card-image"
+                    onError={(e) => {
+                      e.currentTarget.src = "/src/frontend/assets/images/places/ilam.jpg";
+                    }}
                   />
 
                   <div className="place-card-overlay">
@@ -105,7 +143,13 @@ function Search() {
         )}
 
         <section className="all-products-section">
-          {matchedProducts.length > 0 ? (
+          {loading ? (
+            <div className="no-products-message">
+              <Loader2 size={40} className="spin" />
+              <h3>Searching…</h3>
+              <p>Looking for "{query}" in our product catalog.</p>
+            </div>
+          ) : apiProducts.length > 0 ? (
             <>
               <div className="all-products-heading">
                 <h2>Products</h2>
@@ -127,9 +171,9 @@ function Search() {
           ) : query && matchedPlaces.length === 0 ? (
             <div className="no-products-message">
               <SearchIcon size={40} />
-              <h3>No results for “{query}”</h3>
+              <h3>No results for "{query}"</h3>
               <p>
-                Try another product name or place, such as Apple, Honey, or Kullu.
+                Try another product name or place, such as Apple, Honey, or Ilam.
               </p>
               <Link to="/shop">View all products</Link>
             </div>

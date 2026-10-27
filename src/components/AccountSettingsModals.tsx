@@ -1,7 +1,23 @@
 import { useState, type FormEvent } from "react";
+import * as yup from "yup";
 
 import AccountModal from "./account/AccountModal";
 import { useAccount } from "../context/AccountContext";
+
+/**
+ * Yup schema for customer password modification
+ */
+const changePasswordSchema = yup.object().shape({
+  current: yup.string().trim().required("Current password is required"),
+  next: yup
+    .string()
+    .required("New password is required")
+    .min(8, "New password must be at least 8 characters"),
+  confirm: yup
+    .string()
+    .required("Confirm password is required")
+    .oneOf([yup.ref("next")], "Passwords do not match"),
+});
 
 interface AccountSettingsModalsProps {
   passwordOpen: boolean;
@@ -30,35 +46,40 @@ function AccountSettingsModals({
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ current?: string; next?: string; confirm?: string }>({});
+  const [generalError, setGeneralError] = useState("");
 
-  function submitPassword(event: FormEvent) {
+  async function submitPassword(event: FormEvent) {
     event.preventDefault();
-    if (!current.trim()) {
-      setError("Current password is required");
-      return;
+
+    try {
+      await changePasswordSchema.validate({ current, next, confirm }, { abortEarly: false });
+      setFieldErrors({});
+    } catch (err: any) {
+      if (err instanceof yup.ValidationError) {
+        const errs: { current?: string; next?: string; confirm?: string } = {};
+        err.inner.forEach((item) => {
+          if (item.path && !errs[item.path as keyof typeof errs]) {
+            errs[item.path as keyof typeof errs] = item.message;
+          }
+        });
+        setFieldErrors(errs);
+        return;
+      }
     }
-    if (!next.trim()) {
-      setError("New password is required");
-      return;
-    }
-    if (next.length < 8) {
-      setError("New password must be at least 8 characters");
-      return;
-    }
-    if (next !== confirm) {
-      setError("Confirm password must match");
-      return;
-    }
-    const result = changePassword(current, next);
+
+    setFieldErrors({});
+    setGeneralError("");
+    const result = await changePassword(current, next);
     if (result) {
-      setError(result);
+      setGeneralError(result);
       return;
     }
     setCurrent("");
     setNext("");
     setConfirm("");
-    setError("");
+    setFieldErrors({});
+    setGeneralError("");
     onClose();
   }
 
@@ -70,34 +91,61 @@ function AccountSettingsModals({
   return (
     <>
       <AccountModal open={passwordOpen} title="Change Password" onClose={onClose}>
-        <form className="account-form" onSubmit={submitPassword}>
+        <form className="account-form" onSubmit={submitPassword} noValidate>
           <label>
             Current Password
             <input
               type="password"
               value={current}
-              onChange={(event) => setCurrent(event.target.value)}
+              style={{ borderColor: fieldErrors.current ? "#ef4444" : undefined }}
+              onChange={(event) => {
+                setCurrent(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, current: undefined }));
+              }}
             />
+            {fieldErrors.current && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {fieldErrors.current}
+              </span>
+            )}
           </label>
           <label>
             New Password
             <input
               type="password"
               value={next}
-              onChange={(event) => setNext(event.target.value)}
+              style={{ borderColor: fieldErrors.next ? "#ef4444" : undefined }}
+              onChange={(event) => {
+                setNext(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, next: undefined }));
+              }}
             />
+            {fieldErrors.next && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {fieldErrors.next}
+              </span>
+            )}
           </label>
           <label>
             Confirm Password
             <input
               type="password"
               value={confirm}
-              onChange={(event) => setConfirm(event.target.value)}
+              style={{ borderColor: fieldErrors.confirm ? "#ef4444" : undefined }}
+              onChange={(event) => {
+                setConfirm(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, confirm: undefined }));
+              }}
             />
+            {fieldErrors.confirm && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {fieldErrors.confirm}
+              </span>
+            )}
           </label>
-          {error ? <p className="account-form-error">{error}</p> : null}
+          {generalError ? <p className="account-form-error">{generalError}</p> : null}
           <p className="account-login-note">
-            Demo only. This does not change a real account password on a server.
+            Passwords must be at least 8 characters.
           </p>
           <button type="submit" className="account-btn">
             Update Password

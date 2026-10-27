@@ -39,6 +39,7 @@ function AccountReviews() {
   const [editing, setEditing] = useState<MockReview | null>(null);
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
+  const [textError, setTextError] = useState("");
   const [productId, setProductId] = useState(writeOrder?.items[0]?.productId ?? "");
 
   const writeItem = useMemo(
@@ -49,12 +50,17 @@ function AccountReviews() {
   function closeWrite() {
     setParams({});
     setText("");
+    setTextError("");
     setRating(5);
   }
 
   function submitNew(event: FormEvent) {
     event.preventDefault();
-    if (!writeOrder || !writeItem || !text.trim()) {
+    if (!text.trim()) {
+      setTextError("Please enter your review comments");
+      return;
+    }
+    if (!writeOrder || !writeItem) {
       return;
     }
     addReview({
@@ -148,12 +154,22 @@ function AccountReviews() {
           ) : null}
           <StarPicker value={rating} onChange={setRating} />
           <label>
-            Review
+            Review *
             <textarea
               rows={4}
               value={text}
-              onChange={(event) => setText(event.target.value)}
+              style={{ borderColor: textError ? "#ef4444" : undefined }}
+              onChange={(event) => {
+                setText(event.target.value);
+                if (textError) setTextError("");
+              }}
+              placeholder="Share your experience with this fresh harvest..."
             />
+            {textError && (
+              <span style={{ color: "#ef4444", fontSize: 11, display: "block" }}>
+                {textError}
+              </span>
+            )}
           </label>
           <button type="submit" className="account-btn">
             Submit Review

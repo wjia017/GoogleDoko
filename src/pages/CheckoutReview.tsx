@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import CheckoutShell from "../components/CheckoutShell";
 import { paymentLabels, useCheckout } from "../context/CheckoutContext";
-import { useOrders } from "../context/OrdersContext";
+import { useAccount } from "../context/AccountContext";
+
 import { useCart } from "../context/CartContext";
 
 function CheckoutReview() {
@@ -14,16 +15,19 @@ function CheckoutReview() {
     paymentMethod,
     fromCart,
     setLastOrderId,
+    subtotal,
+    deliveryFee,
+    discount,
+    total,
+    couponCode,
+    calculationError,
+    isCalculating,
   } = useCheckout();
-  const { placeCheckoutOrder } = useOrders();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const orderId = useRef(`GD-${crypto.randomUUID()}`);
+  const { createShopOrder, user } = useAccount();
   const { clearCart } = useCart();
-
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-  const deliveryFee = items.length > 0 ? 50 : 0;
-  const total = subtotal + deliveryFee;
 
   const grouped = items.reduce<Record<string, typeof items>>((groups, item) => {
     const key = item.seller || "Local Seller";
@@ -37,7 +41,10 @@ function CheckoutReview() {
     }
   }, [items.length, navigate]);
 
-  function placeOrder() {
+  async function placeOrder() {
+    if (busy || isCalculating || calculationError) return;
+    if (!form.fullName || !form.phone || !form.street || !form.district) { navigate('/checkout'); return; }
+    setBusy(true); setError('');
     const address = [
       form.street,
       form.area,
@@ -48,29 +55,47 @@ function CheckoutReview() {
       .filter(Boolean)
       .join(", ");
 
-    const order = placeCheckoutOrder({
-      items: items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        image: item.image,
-        price: item.price,
-        quantity: item.quantity,
-        origin: item.origin,
-        seller: item.seller,
-        unit: item.weight,
-      })),
-      recipientName: form.fullName,
-      recipientPhone: form.phone,
-      deliveryAddress: address,
-      paymentMethod: paymentLabels[paymentMethod],
-      total,
-    });
+    try {
+      const orderPayload = {
+        id: orderId.current,
+        date: new Date().toISOString(),
+        status: "Pending" as const,
+        items: items.map((item) => ({
+          productId: item.id,
+          name: item.name,
+          image: item.image,
+          quantity: item.quantity,
+          price: item.price,
+          weight: item.weight,
+          seller: item.seller,
+          origin: item.origin,
+        })),
+        subtotal,
+        deliveryFee,
+        discount,
+        total,
+        paymentMethod: paymentLabels[paymentMethod],
+        paymentStatus: "Pending",
+        deliveryAddress: address,
+        recipientName: form.fullName || `${user.firstName} ${user.lastName}`.trim(),
+        recipientPhone: form.phone,
+        couponCode: couponCode || undefined,
+        fromCart,
+      };
 
-    setLastOrderId(order.id);
-    if (fromCart) {
-      clearCart();
+      await createShopOrder(orderPayload);
+      setLastOrderId(orderId.current);
+      if (fromCart) {
+        clearCart();
+      }
+      navigate("/checkout/confirmation", {
+        state: { orderId: orderId.current, order: orderPayload },
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not place order");
+    } finally {
+      setBusy(false);
     }
-    navigate("/checkout/confirmation");
   }
 
   return (
@@ -160,14 +185,21 @@ function CheckoutReview() {
           </div>
           <div className="co-summary-row">
             <span>Delivery Fee</span>
-            <strong>Rs. {deliveryFee}</strong>
+            <strong>{deliveryFee === 0 ? "FREE" : `Rs. ${deliveryFee}`}</strong>
           </div>
+          {discount > 0 && (
+            <div className="co-summary-row" style={{ color: "var(--brand, #2e7d32)" }}>
+              <span>Promo Discount {couponCode ? `(${couponCode})` : ""}</span>
+              <strong>-Rs. {discount.toLocaleString()}</strong>
+            </div>
+          )}
           <div className="co-summary-total">
             <span>Grand Total</span>
             <strong>Rs. {total.toLocaleString()}</strong>
           </div>
-          <button type="button" className="co-continue" onClick={placeOrder}>
-            Place Order
+          {error && <p className="auth-error" role="alert">{error}</p>}
+          <button type="button" className="co-continue" onClick={placeOrder} disabled={busy}>
+            {busy ? "Placing order…" : "Place Order"}
             <span>→</span>
           </button>
         </aside>

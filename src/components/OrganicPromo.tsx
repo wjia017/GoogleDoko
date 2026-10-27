@@ -9,7 +9,7 @@ function OrganicPromo() {
           <div className="organic-promo-circle"></div>
 
           <img
-            src="/src/assets/images/organic-vegetables.jpg"
+            src="/src/frontend/assets/images/organic-vegetables.jpg"
             alt="Fresh organic vegetables"
             className="organic-promo-image"
           />

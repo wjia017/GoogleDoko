@@ -1,9 +1,9 @@
 import OfferCard from "./OfferCard";
 import { Link } from "react-router-dom";
 
-import explorePlacesImage from "../assets/images/offers/explore-places.jpg";
-import popularNearYouImage from "../assets/images/offers/popular-near-you.jpg";
-import seasonalImage from "../assets/images/offers/seasonal.jpg";
+import explorePlacesImage from "../assets/images/offers/explore-places-hd.png";
+import popularNearYouImage from "../assets/images/offers/popular-near-you-hd.png";
+import seasonalImage from "../assets/images/offers/seasonal-hd.png";
 
 const offers = [
   {

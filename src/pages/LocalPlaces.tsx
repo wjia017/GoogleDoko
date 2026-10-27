@@ -3,18 +3,28 @@ import { ArrowRight, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import Pagination, {
   paginateItems,
   PLACES_PAGE_SIZE,
 } from "../components/Pagination";
 
-import { products } from "../data/products";
+import { products, type Product } from "../data/products";
+import { useGetProductsQuery } from "../store/api/apiSlice";
+
+const placeImages = import.meta.glob("../assets/images/places/*.jpg", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
 
 function placeImage(origin: string) {
   const slug = origin.split(",")[0].trim().toLowerCase().replace(/\s+/g, "-");
-  return `/src/assets/images/places/${slug}.jpg`;
+  return (
+    placeImages[`../assets/images/places/${slug}.jpg`] ||
+    placeImages["../assets/images/places/ilam.jpg"] ||
+    "/src/frontend/assets/images/places/ilam.jpg"
+  );
 }
 
 function placeName(origin: string) {
@@ -28,7 +38,14 @@ function soldCount(sold: string) {
 
 function LocalPlaces() {
   const [page, setPage] = useState(1);
-  const places = products.reduce<
+  const { data: serverProducts } = useGetProductsQuery();
+  const allProducts = (
+    serverProducts && serverProducts.length > 0
+      ? (serverProducts as unknown as Product[])
+      : products
+  );
+
+  const places = allProducts.reduce<
     {
       origin: string;
       name: string;
@@ -58,7 +75,7 @@ function LocalPlaces() {
   function changePage(nextPage: number) {
     setPage(nextPage);
     document
-      .querySelector(".places-list-section")
+      .querySelector(".all-products-section")
       ?.scrollIntoView({ behavior: "auto", block: "start" });
   }
 
@@ -67,9 +84,9 @@ function LocalPlaces() {
       <TopBar />
       <Navbar />
 
-      <main className="places-page">
-        <section className="places-banner">
-          <div className="places-banner-content">
+      <main className="shop-page">
+        <section className="shop-banner">
+          <div className="shop-banner-content">
             <span>EXPLORE LOCAL PLACES</span>
             <h1>Discover authentic products from their original places</h1>
             <p>
@@ -79,7 +96,12 @@ function LocalPlaces() {
           </div>
         </section>
 
-        <section className="places-list-section">
+        <section className="all-products-section">
+          <div className="all-products-heading">
+            <h2>All Places</h2>
+            <p>Explore authentic local regions and their specialties</p>
+          </div>
+
           <div className="places-grid">
             {paged.items.map((place) => (
               <Link
@@ -91,6 +113,9 @@ function LocalPlaces() {
                   src={place.image}
                   alt={place.name}
                   className="place-card-image"
+                  onError={(e) => {
+                    e.currentTarget.src = "/src/frontend/assets/images/places/ilam.jpg";
+                  }}
                 />
 
                 <div className="place-card-overlay">

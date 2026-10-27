@@ -31,6 +31,8 @@ export interface AccountOrder {
   deliveryAddress: string;
   recipientName: string;
   recipientPhone: string;
+  couponCode?: string;
+  fromCart?: boolean;
 }
 
 function item(id: string, quantity: number): AccountOrderItem {

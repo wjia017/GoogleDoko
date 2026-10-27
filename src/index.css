@@ -11,8 +11,10 @@
 html {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -23,7 +25,7 @@ body {
   margin: 0;
   padding: 0;
 
-  overflow-x: hidden;
+  overflow-x: clip;
 
   font-family: Arial, Helvetica, sans-serif;
 
@@ -36,7 +38,7 @@ body {
   max-width: 100%;
   min-width: 0;
 
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 img {

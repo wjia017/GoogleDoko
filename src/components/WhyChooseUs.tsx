@@ -1,33 +1,39 @@
+import organicImage from "../assets/images/why-choose-us/organic.png";
+import farmersImage from "../assets/images/why-choose-us/farmers.png";
+import freshImage from "../assets/images/why-choose-us/fresh.png";
+import qualityImage from "../assets/images/why-choose-us/quality.png";
+import deliveryImage from "../assets/images/why-choose-us/delivery.png";
+
 const reasons = [
   {
     id: 1,
     title: "100 % Organic",
     description: "No Harmful Chemicals",
-    image: "/src/assets/images/why-choose-us/organic.jpg",
+    image: organicImage,
   },
   {
     id: 2,
     title: "Local Farmers",
     description: "Support local livelihood",
-    image: "/src/assets/images/why-choose-us/farmers.jpg",
+    image: farmersImage,
   },
   {
     id: 3,
     title: "Fresh & Natural",
     description: "Fresh to table",
-    image: "/src/assets/images/why-choose-us/fresh.jpg",
+    image: freshImage,
   },
   {
     id: 4,
     title: "Quality Assured",
     description: "Strict quality check",
-    image: "/src/assets/images/why-choose-us/quality.jpg",
+    image: qualityImage,
   },
   {
     id: 5,
-    title: "Safe Delivery",
+    title: "Safe Delievery",
     description: "Hygienic & timely",
-    image: "/src/assets/images/why-choose-us/delivery.jpg",
+    image: deliveryImage,
   },
 ];
 
@@ -40,15 +46,15 @@ function WhyChooseUs() {
         <div className="why-choose-us-heading">
 
           <div className="why-heading-decoration">
-            <span className="why-heading-line"></span>
             <span className="why-heading-dot"></span>
+            <span className="why-heading-line"></span>
           </div>
 
           <h2>Why Choose Us</h2>
 
           <div className="why-heading-decoration right">
-            <span className="why-heading-dot"></span>
             <span className="why-heading-line"></span>
+            <span className="why-heading-dot"></span>
           </div>
 
         </div>
@@ -64,6 +70,7 @@ function WhyChooseUs() {
                 <img
                   src={reason.image}
                   alt={reason.title}
+                  className="why-icon-img"
                 />
               </div>
 
